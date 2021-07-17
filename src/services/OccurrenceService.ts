@@ -10,7 +10,7 @@ import { createOccurrenceInternalComment } from '../types/occurrence/createOccur
 import { listEmployeeOccurrenceResponse } from '../types/occurrence/listEmployeeOccurrenceResponse'
 import { updateOccurrenceRequest } from '../types/occurrence/updateOccurrenceRequest'
 import { pagination } from '../types/pagination'
-import { getUserFromId } from './CitizenService'
+import { getCitizenFromId } from './CitizenService'
 import { getEmployeeById } from './EmployeeService'
 
 const getOccurrenceById = async (occurrenceId: string): Promise<Occurrence> => {
@@ -41,7 +41,7 @@ const createOccurrence = async (entity: crateOccurrenceRequest) => {
     occurrence.reference = entity.reference
     occurrence.latitude = entity.latitude
     occurrence.longitude = entity.longitude
-    occurrence.citizen = await getUserFromId(entity.citizenId)
+    occurrence.citizen = await getCitizenFromId(entity.citizenId)
 
     repository.save(occurrence)
 }

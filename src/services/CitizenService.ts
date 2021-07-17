@@ -10,49 +10,33 @@ import { loginCitizenResponse } from '../types/citizen/loginCitizenResponse'
 import { loginCitizenRequest } from '../types/citizen/loginCitizenRequest'
 import UnauthorizedError from '../exceptions/UnauthorizedError'
 import BadRequestError from '../exceptions/BadRequestError'
+import { createCitizenRequest } from '../types/citizen/createCitizenRequest'
 
 const checkExistUserByEmailAndCpf = async (email: string, cpf: string) => {
     const repository = getRepository(Citizen)
 
-    const { count } = await repository
-        .createQueryBuilder('citizen')
-        .select('count(1)', 'count')
-        .where('citizen.email = :email')
-        .orWhere('citizen.cpf = :cpf')
-        .setParameters({ email, cpf })
-        .getRawOne()
+    const count = await repository.count({
+        where: [
+            {
+                email,
+            },
+            {
+                cpf,
+            },
+        ],
+    })
 
     return count > 0
 }
 
-const getUserFromCpf = async (cpf: string): Promise<Citizen> => {
+const getCitizenFromId = async (id: string): Promise<Citizen> => {
     const repository = getRepository(Citizen)
 
-    const result = await repository
-        .createQueryBuilder('citizen')
-        .where('citizen.cpf = :cpf')
-        .setParameters({
-            cpf,
-        })
-        .getOne()
-
-    if (result == undefined) {
-        throw new BadRequestError('CPF or Password incorrect')
-    }
-
-    return result
-}
-
-const getUserFromId = async (id: string): Promise<Citizen> => {
-    const repository = getRepository(Citizen)
-
-    const result = await repository
-        .createQueryBuilder('citizen')
-        .where('citizen.id = :id')
-        .setParameters({
+    const result = await repository.findOne({
+        where: {
             id,
-        })
-        .getOne()
+        },
+    })
 
     if (result == undefined) {
         throw new NotFoundError('Citizen not found')
@@ -61,7 +45,26 @@ const getUserFromId = async (id: string): Promise<Citizen> => {
     return result
 }
 
-const createCitizen = async (entity: Citizen) => {
+const getCitizenFromCpf = async (
+    cpf: string,
+    errorMessage?: string
+): Promise<Citizen> => {
+    const repository = getRepository(Citizen)
+
+    const result = await repository.findOne({
+        where: {
+            cpf,
+        },
+    })
+
+    if (result == undefined) {
+        throw new BadRequestError(errorMessage || 'Citizen not found')
+    }
+
+    return result
+}
+
+const createCitizen = async (entity: createCitizenRequest) => {
     const repository = getRepository(Citizen)
 
     const existUser = await checkExistUserByEmailAndCpf(
@@ -89,7 +92,10 @@ const createCitizen = async (entity: Citizen) => {
 const loginCitizen = async (
     entity: loginCitizenRequest
 ): Promise<loginCitizenResponse> => {
-    const citizen = await getUserFromCpf(entity.cpf)
+    const citizen = await getCitizenFromCpf(
+        entity.cpf,
+        'CPF or Password incorrect'
+    )
 
     if (!(await compare(entity.password, citizen.password))) {
         throw new BadRequestError('CPF or Password incorrect')
@@ -105,8 +111,8 @@ const loginCitizen = async (
             first_name: citizen.first_name,
             last_name: citizen.last_name,
         },
-        60 * 60 * 24 * 30
-    ) // 30 days
+        60 * 60 * 24 * 30 // 30 days
+    )
 
     return {
         first_name: citizen.first_name,
@@ -118,15 +124,13 @@ const loginCitizen = async (
 const activeEmailCitizen = async (token: string) => {
     const repository = getRepository(Citizen)
 
-    const citizen = await repository
-        .createQueryBuilder('citizen')
-        .where('citizen.hash_verified_email = :token')
-        .setParameters({
-            token,
-        })
-        .getOne()
+    const citizen = await repository.findOne({
+        where: {
+            hash_verified_email: token,
+        },
+    })
 
-    if (citizen == undefined) {
+    if (citizen === undefined) {
         throw new NotFoundError('Token not found')
     }
 
@@ -138,4 +142,11 @@ const activeEmailCitizen = async (token: string) => {
     return repository.save(citizen)
 }
 
-export { createCitizen, loginCitizen, activeEmailCitizen, getUserFromId }
+export {
+    checkExistUserByEmailAndCpf,
+    getCitizenFromId,
+    getCitizenFromCpf,
+    createCitizen,
+    loginCitizen,
+    activeEmailCitizen,
+}

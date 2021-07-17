@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 
-import { getUserFromId } from '../services/CitizenService'
+import { getCitizenFromId } from '../services/CitizenService'
 import BadRequestError from '../exceptions/BadRequestError'
 import { verify } from '../utils/jwt'
 
@@ -33,7 +33,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     }
 
     try {
-        await getUserFromId(tokenDecoded.citizenId)
+        await getCitizenFromId(tokenDecoded.citizenId)
     } catch (err) {
         return next(err)
     }
