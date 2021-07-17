@@ -7,10 +7,14 @@ import {
     getOccurrencesCitizen,
     getOccurrencesEmployee,
     getOccurrenceEmployee,
+    updateOccurrence,
+    removeOccurrenceNotification,
+    createOccurrenceInternalComment,
 } from '../services/OccurrenceService'
 import createOccurrenceSchema from '../schemas/Occurrence/createOccurrenceSchema'
 import citizenAuthorization from '../middlewares/citizenAuthorization'
 import employeeAuthorization from '../middlewares/employeeAuthorization'
+import createOccurrenceInternalCommentSchema from '../schemas/Occurrence/createOccurrenceInternalCommentSchema'
 
 const routes = Router()
 
@@ -76,6 +80,59 @@ routes.get(
         try {
             const result = await getOccurrenceEmployee(req.params.occurrenceId)
             res.status(200).send(result)
+        } catch (err) {
+            next(err)
+        }
+    }
+)
+
+routes.put('/:occurrenceId', citizenAuthorization, async (req, res, next) => {
+    try {
+        const occurrenceId = req.params.occurrenceId
+        const citizenId = (req as any).citizenId
+
+        await removeOccurrenceNotification(occurrenceId, citizenId)
+        res.status(200).send()
+    } catch (err) {
+        next(err)
+    }
+})
+
+routes.put(
+    '/:occurrenceId/remove-notification',
+    citizenAuthorization,
+    async (req, res, next) => {
+        try {
+            const occurrenceId = req.params.occurrenceId
+            const citizenId = (req as any).citizenId
+
+            await removeOccurrenceNotification(occurrenceId, citizenId)
+            res.status(200).send()
+        } catch (err) {
+            next(err)
+        }
+    }
+)
+
+routes.post(
+    '/:occurrenceId/internal-comment',
+    employeeAuthorization,
+    async (req, res, next) => {
+        try {
+            const occurrenceId = req.params.occurrenceId
+            const employeeId = (req as any).employeeId
+            const values = validate(
+                createOccurrenceInternalCommentSchema,
+                req.body
+            )
+
+            await createOccurrenceInternalComment(
+                occurrenceId,
+                employeeId,
+                values
+            )
+
+            res.status(201).send()
         } catch (err) {
             next(err)
         }

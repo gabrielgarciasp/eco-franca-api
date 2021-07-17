@@ -38,6 +38,9 @@ export default class Occurrence {
     number: string
 
     @Column({ nullable: true })
+    violationNumber: string
+
+    @Column({ nullable: true })
     district: string
 
     @Column({ nullable: true })
