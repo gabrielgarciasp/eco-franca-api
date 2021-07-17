@@ -1,8 +1,9 @@
 import 'reflect-metadata'
-import './configs/database'
 
 import dotenv from 'dotenv'
 dotenv.config()
+
+import './configs/database'
 
 import express, { json } from 'express'
 import helmet from 'helmet'
