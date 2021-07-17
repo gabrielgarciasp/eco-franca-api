@@ -9,10 +9,13 @@ import NotFoundError from '../exceptions/NotFoundError'
 import { loginCitizenResponse } from '../types/citizen/loginCitizenResponse'
 import { loginCitizenRequest } from '../types/citizen/loginCitizenRequest'
 import UnauthorizedError from '../exceptions/UnauthorizedError'
-import BadRequestError from '../exceptions/BadRequestError'
 import { createCitizenRequest } from '../types/citizen/createCitizenRequest'
+import { checkExistsCpfCitizenRequest } from '../types/employee/checkExistsCpfCitizenRequest'
+import { checkExistsCpfCitizenResponse } from '../types/employee/checkExistsCpfCitizenResponse'
+import { checkExistsEmailCitizenRequest } from '../types/employee/checkExistsEmailCitizenRequest'
+import { checkExistsEmailCitizenResponse } from '../types/employee/checkExistsEmailCitizenResponse'
 
-const checkExistUserByEmailAndCpf = async (email: string, cpf: string) => {
+const checkExistsUserByEmailAndCpf = async (email: string, cpf: string) => {
     const repository = getRepository(Citizen)
 
     const count = await repository.count({
@@ -58,7 +61,7 @@ const getCitizenFromCpf = async (
     })
 
     if (result == undefined) {
-        throw new BadRequestError(errorMessage || 'Citizen not found')
+        throw new NotFoundError(errorMessage || 'Citizen not found')
     }
 
     return result
@@ -67,7 +70,7 @@ const getCitizenFromCpf = async (
 const createCitizen = async (entity: createCitizenRequest) => {
     const repository = getRepository(Citizen)
 
-    const existUser = await checkExistUserByEmailAndCpf(
+    const existUser = await checkExistsUserByEmailAndCpf(
         entity.email,
         entity.cpf
     )
@@ -98,7 +101,7 @@ const loginCitizen = async (
     )
 
     if (!(await compare(entity.password, citizen.password))) {
-        throw new BadRequestError('CPF or Password incorrect')
+        throw new NotFoundError('CPF or Password incorrect')
     }
 
     if (!citizen.verified_email) {
@@ -142,11 +145,45 @@ const activeEmailCitizen = async (token: string) => {
     return repository.save(citizen)
 }
 
+const getExistsCitizenByCpf = async (
+    entity: checkExistsCpfCitizenRequest
+): Promise<checkExistsCpfCitizenResponse> => {
+    const repository = getRepository(Citizen)
+
+    const count = await repository.count({
+        where: {
+            cpf: entity.cpf,
+        },
+    })
+
+    return {
+        exists: count > 0,
+    }
+}
+
+const getExistsCitizenByEmail = async (
+    entity: checkExistsEmailCitizenRequest
+): Promise<checkExistsEmailCitizenResponse> => {
+    const repository = getRepository(Citizen)
+
+    const count = await repository.count({
+        where: {
+            email: entity.email,
+        },
+    })
+
+    return {
+        exists: count > 0,
+    }
+}
+
 export {
-    checkExistUserByEmailAndCpf,
+    checkExistsUserByEmailAndCpf,
     getCitizenFromId,
     getCitizenFromCpf,
     createCitizen,
     loginCitizen,
     activeEmailCitizen,
+    getExistsCitizenByCpf,
+    getExistsCitizenByEmail,
 }
