@@ -1,9 +1,11 @@
 import { getRepository } from 'typeorm'
+
 import ForbiddenError from '../exceptions/ForbiddenError'
 import NotFoundError from '../exceptions/NotFoundError'
-
 import Occurrence from '../models/Occurrence'
 import { crateOccurrenceRequest } from '../types/occurrence/crateOccurrenceRequest'
+import { listEmployeeOccurrenceResponse } from '../types/occurrence/listEmployeeOccurrenceResponse'
+import { pagination } from '../types/pagination'
 import { getUserFromId } from './CitizenService'
 
 const createOccurrence = async (entity: crateOccurrenceRequest) => {
@@ -62,4 +64,51 @@ const getOccurrenceCitizen = async (
     return occurrence
 }
 
-export { createOccurrence, getOccurrencesCitizen, getOccurrenceCitizen }
+const getOccurrencesEmployee = async (
+    pagination: pagination
+): Promise<listEmployeeOccurrenceResponse> => {
+    const repository = getRepository(Occurrence)
+
+    const page = pagination.page >= 0 ? pagination.page : 0
+    const limit = pagination.limit >= 0 ? pagination.limit : 10
+
+    const countTotalRows = await repository.count()
+    const countTotalPages = Math.ceil(countTotalRows / limit)
+
+    const result = await repository.find({
+        order: {
+            updatedAt: 'ASC',
+        },
+        take: limit,
+        skip: page * limit,
+    })
+
+    return {
+        occurrence: result,
+        pages: countTotalPages,
+    }
+}
+
+const getOccurrenceEmployee = async (
+    occurrenceId: string
+): Promise<Occurrence> => {
+    const repository = getRepository(Occurrence)
+
+    const occurrence = await repository.findOne(occurrenceId, {
+        relations: ['citizen', 'histories', 'photos', 'internalComments'],
+    })
+
+    if (occurrence == undefined) {
+        throw new NotFoundError('Occurrence not found')
+    }
+
+    return occurrence
+}
+
+export {
+    createOccurrence,
+    getOccurrencesCitizen,
+    getOccurrenceCitizen,
+    getOccurrencesEmployee,
+    getOccurrenceEmployee,
+}

@@ -1,6 +1,6 @@
 import { getRepository } from 'typeorm'
-import BadRequestError from '../exceptions/BadRequestError'
 
+import BadRequestError from '../exceptions/BadRequestError'
 import ConflictError from '../exceptions/ConflictError'
 import ForbiddenError from '../exceptions/ForbiddenError'
 import Employee from '../models/Employee'
@@ -20,6 +20,22 @@ const checkExistEmployeeByEmail = async (email: string) => {
     })
 
     return count > 0
+}
+
+const getEmployeeById = async (id: string): Promise<Employee> => {
+    const repository = getRepository(Employee)
+
+    const employee = await repository.findOne({
+        where: {
+            id,
+        },
+    })
+
+    if (employee === undefined) {
+        throw new BadRequestError('Employee not found')
+    }
+
+    return employee
 }
 
 const getUserByEmail = async (email: string): Promise<Employee> => {
@@ -60,11 +76,7 @@ const createEmployee = async (entity: createEmployeeRequest) => {
 const loginEmployee = async (
     entity: loginEmployeeRequest
 ): Promise<loginEmployeeResponse> => {
-    const repository = getRepository(Employee)
-
     const employee = await getUserByEmail(entity.email)
-
-    console.log(employee)
 
     if (!(await compare(entity.password, employee.password))) {
         throw new BadRequestError('Email or Password incorrect')
@@ -76,7 +88,7 @@ const loginEmployee = async (
 
     const token = sign(
         {
-            citizenId: employee.id,
+            employeeId: employee.id,
             first_name: employee.first_name,
             last_name: employee.last_name,
         },
@@ -90,4 +102,4 @@ const loginEmployee = async (
     }
 }
 
-export { createEmployee, loginEmployee }
+export { createEmployee, loginEmployee, getEmployeeById }
