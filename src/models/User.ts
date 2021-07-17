@@ -9,7 +9,7 @@ import {
 export default class User {
     @PrimaryColumn()
     @Generated('uuid')
-    id: string | undefined
+    id: string
 
     @Column({ unique: true })
     email: string
@@ -23,18 +23,12 @@ export default class User {
     @Column()
     last_name: string
 
-    @Column()
-    verified_email: boolean
-
-    @Column()
-    hash_verified_email: string
-
     @Column({ nullable: true })
     hash_update_password: string
 
     @CreateDateColumn()
-    created_at: Date
+    createdAt: Date
 
     @UpdateDateColumn()
-    updated_at: Date
+    updatedAt: Date
 }
