@@ -1,20 +1,46 @@
 import { getRepository } from 'typeorm'
 
 import ConflictError from '../exceptions/ConflictError'
-import { encrypt } from '../utils/bcrypt'
+import { encrypt, compare } from '../utils/bcrypt'
 import uuid from '../utils/uuid'
+import { sign } from '../utils/jwt'
 
 import Citizen from '../models/Citizen'
+import NotFoundError from '../exceptions/NotFoundError'
+import { loginCitizenResponse } from '../types/citizen/loginCitizenResponse'
+import { loginCitizenRequest } from '../types/citizen/loginCitizenRequest'
+import UnauthorizedError from '../exceptions/UnauthorizedError'
 
 const checkExistUserByEmailAndCpf = async (email: string, cpf: string) => {
     const repository = getRepository(Citizen)
 
-    const result = await repository.query(
-        `select count(1) as count from citizen where email = ? or cpf = ?`,
-        [email, cpf]
-    )
+    const { count } = await repository
+        .createQueryBuilder('citizen')
+        .select('count(1)', 'count')
+        .where('citizen.email = :email')
+        .orWhere('citizen.cpf = :cpf')
+        .setParameters({ email, cpf })
+        .getRawOne()
 
-    return result[0].count > 0
+    return count > 0
+}
+
+const getUserFromCpf = async (cpf: string): Promise<Citizen> => {
+    const repository = getRepository(Citizen)
+
+    const result = await repository
+        .createQueryBuilder('citizen')
+        .where('citizen.cpf = :cpf')
+        .setParameters({
+            cpf: cpf,
+        })
+        .getOne()
+
+    if (result == undefined) {
+        throw new NotFoundError('CPF or Password not incorrect')
+    }
+
+    return result
 }
 
 const createCitizen = async (entity: Citizen) => {
@@ -26,7 +52,7 @@ const createCitizen = async (entity: Citizen) => {
     )
 
     if (existUser) {
-        throw new ConflictError('This email is already in use')
+        throw new ConflictError('This email or cpf is already in use')
     }
 
     const citizen = new Citizen()
@@ -42,4 +68,52 @@ const createCitizen = async (entity: Citizen) => {
     await repository.save(citizen)
 }
 
-export { createCitizen }
+const loginCitizen = async (
+    entity: loginCitizenRequest
+): Promise<loginCitizenResponse> => {
+    const citizen = await getUserFromCpf(entity.cpf)
+
+    if (!(await compare(entity.password, citizen.password))) {
+        throw new NotFoundError('CPF or Password incorrect')
+    }
+
+    if (!citizen.verified_email) {
+        throw new UnauthorizedError('Email not yet verified')
+    }
+
+    const token = sign({
+        first_name: citizen.first_name,
+        last_name: citizen.last_name,
+    })
+
+    return {
+        first_name: citizen.first_name,
+        last_name: citizen.last_name,
+        token,
+    }
+}
+
+const activeEmailCitizen = async (token: string) => {
+    const repository = getRepository(Citizen)
+
+    const citizen = await repository
+        .createQueryBuilder('citizen')
+        .where('citizen.hash_verified_email = :token')
+        .setParameters({
+            token,
+        })
+        .getOne()
+
+    if (citizen == undefined) {
+        throw new NotFoundError('Token not found')
+    }
+
+    // Não realiza um novo update, pois já está ativo
+    if (citizen.verified_email) return
+
+    citizen.verified_email = true
+
+    return repository.save(citizen)
+}
+
+export { createCitizen, loginCitizen, activeEmailCitizen }
