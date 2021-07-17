@@ -8,12 +8,12 @@ import Citizen from '../models/Citizen'
 import NotFoundError from '../exceptions/NotFoundError'
 import { loginCitizenResponse } from '../types/citizen/loginCitizenResponse'
 import { loginCitizenRequest } from '../types/citizen/loginCitizenRequest'
-import UnauthorizedError from '../exceptions/UnauthorizedError'
 import { createCitizenRequest } from '../types/citizen/createCitizenRequest'
 import { checkExistsCpfCitizenRequest } from '../types/employee/checkExistsCpfCitizenRequest'
 import { checkExistsCpfCitizenResponse } from '../types/employee/checkExistsCpfCitizenResponse'
 import { checkExistsEmailCitizenRequest } from '../types/employee/checkExistsEmailCitizenRequest'
 import { checkExistsEmailCitizenResponse } from '../types/employee/checkExistsEmailCitizenResponse'
+import ForbiddenError from '../exceptions/ForbiddenError'
 
 const checkExistsUserByEmailAndCpf = async (email: string, cpf: string) => {
     const repository = getRepository(Citizen)
@@ -105,7 +105,7 @@ const loginCitizen = async (
     }
 
     if (!citizen.verified_email) {
-        throw new UnauthorizedError('Email not yet verified')
+        throw new ForbiddenError('Email not yet verified')
     }
 
     const token = sign(
