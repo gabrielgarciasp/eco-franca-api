@@ -4,7 +4,6 @@ import ConflictError from '../exceptions/ConflictError'
 import { encrypt, compare } from '../utils/bcrypt'
 import uuid from '../utils/uuid'
 import { sign } from '../utils/jwt'
-
 import Citizen from '../models/Citizen'
 import NotFoundError from '../exceptions/NotFoundError'
 import { loginCitizenResponse } from '../types/citizen/loginCitizenResponse'
@@ -32,12 +31,30 @@ const getUserFromCpf = async (cpf: string): Promise<Citizen> => {
         .createQueryBuilder('citizen')
         .where('citizen.cpf = :cpf')
         .setParameters({
-            cpf: cpf,
+            cpf,
         })
         .getOne()
 
     if (result == undefined) {
         throw new NotFoundError('CPF or Password not incorrect')
+    }
+
+    return result
+}
+
+const getUserFromId = async (id: string): Promise<Citizen> => {
+    const repository = getRepository(Citizen)
+
+    const result = await repository
+        .createQueryBuilder('citizen')
+        .where('citizen.id = :id')
+        .setParameters({
+            id,
+        })
+        .getOne()
+
+    if (result == undefined) {
+        throw new NotFoundError('Citizen not found')
     }
 
     return result
@@ -82,6 +99,7 @@ const loginCitizen = async (
     }
 
     const token = sign({
+        citizenId: citizen.id,
         first_name: citizen.first_name,
         last_name: citizen.last_name,
     })
@@ -116,4 +134,4 @@ const activeEmailCitizen = async (token: string) => {
     return repository.save(citizen)
 }
 
-export { createCitizen, loginCitizen, activeEmailCitizen }
+export { createCitizen, loginCitizen, activeEmailCitizen, getUserFromId }

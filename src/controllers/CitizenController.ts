@@ -39,7 +39,9 @@ routes.post('/active/:token', async (req, res, next) => {
             activeEmailCitizenSchema,
             req.params as object
         ) as activeEmailCitizenRequest
+
         await activeEmailCitizen(values.token)
+        
         res.status(200).send()
     } catch (err) {
         next(err)

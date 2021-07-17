@@ -20,33 +20,33 @@ export default class Occurrence {
     id: string
 
     @Column()
-    category: number
+    category: string
 
     @Column()
-    status: number
+    status: string
 
     @Column()
     description: string
 
-    @Column()
+    @Column({ nullable: true })
     cep: string
 
-    @Column()
+    @Column({ nullable: true })
     address: string
 
-    @Column()
+    @Column({ nullable: true })
     number: string
 
-    @Column()
+    @Column({ nullable: true })
     district: string
 
-    @Column()
+    @Column({ nullable: true })
     reference: string
 
-    @Column()
+    @Column({ nullable: true })
     latitude: string
 
-    @Column()
+    @Column({ nullable: true })
     longitude: string
 
     @CreateDateColumn()

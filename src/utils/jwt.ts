@@ -1,4 +1,5 @@
 import jwt, { JwtPayload } from 'jsonwebtoken'
+import ApiError from '../exceptions/ApiError'
 
 const jwtSecret = process.env.JWT_SECRET || 'myjwtsecret123'
 
@@ -7,7 +8,11 @@ const sign = (object: object, expires?: number): string => {
 }
 
 const verify = (token: string): string | jwt.JwtPayload => {
-    return jwt.verify(token, jwtSecret)
+    try {
+        return jwt.verify(token, jwtSecret)
+    } catch {
+        throw new ApiError(400, 'Token invalid')
+    }
 }
 
 export { sign, verify }
