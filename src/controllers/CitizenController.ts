@@ -34,7 +34,7 @@ routes.post('/login', async (req, res, next) => {
 routes.post('/active/:token', async (req, res, next) => {
     try {
         await activeEmailCitizen(req.params.token)
-        res.status(200).send()
+        res.status(204).send()
     } catch (err) {
         next(err)
     }
