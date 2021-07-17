@@ -10,7 +10,6 @@ const schema = Yup.object().shape({
     reference: Yup.string(),
     latitude: Yup.string(),
     longitude: Yup.string(),
-    citizenId: Yup.string().required(),
 })
 
 export default schema

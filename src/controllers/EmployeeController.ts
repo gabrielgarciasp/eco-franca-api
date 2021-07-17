@@ -12,7 +12,7 @@ routes.post('/', employeeAuthorization, async (req, res, next) => {
     try {
         const values = validate(createEmployeeSchema, req.body)
         await createEmployee(values)
-        res.status(201).send()
+        res.status(204).send()
     } catch (err) {
         next(err)
     }

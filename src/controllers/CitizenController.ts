@@ -15,7 +15,7 @@ routes.post('/', async (req, res, next) => {
     try {
         const values = validate(createCitizenSchema, req.body)
         await createCitizen(values)
-        res.status(201).send()
+        res.status(204).send()
     } catch (err) {
         next(err)
     }
