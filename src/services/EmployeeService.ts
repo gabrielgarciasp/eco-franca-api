@@ -38,17 +38,20 @@ const getEmployeeById = async (id: string): Promise<Employee> => {
     return employee
 }
 
-const getUserByEmail = async (email: string): Promise<Employee> => {
+const getEmployeeByEmail = async (
+    email: string,
+    errorMessage?: string
+): Promise<Employee> => {
     const repository = getRepository(Employee)
 
     const employee = await repository.findOne({
         where: {
-            email,
+            email: email,
         },
     })
 
     if (employee === undefined) {
-        throw new BadRequestError('Email or Password incorrect')
+        throw new BadRequestError(errorMessage || 'Employee not found')
     }
 
     return employee
@@ -76,7 +79,10 @@ const createEmployee = async (entity: createEmployeeRequest) => {
 const loginEmployee = async (
     entity: loginEmployeeRequest
 ): Promise<loginEmployeeResponse> => {
-    const employee = await getUserByEmail(entity.email)
+    const employee = await getEmployeeByEmail(
+        entity.email,
+        'Email or Password incorrect'
+    )
 
     if (!(await compare(entity.password, employee.password))) {
         throw new BadRequestError('Email or Password incorrect')
@@ -92,8 +98,8 @@ const loginEmployee = async (
             first_name: employee.first_name,
             last_name: employee.last_name,
         },
-        60 * 60 * 12
-    ) // 12 hrs
+        60 * 60 * 12 // 12 hrs
+    )
 
     return {
         first_name: employee.first_name,
@@ -102,4 +108,10 @@ const loginEmployee = async (
     }
 }
 
-export { createEmployee, loginEmployee, getEmployeeById }
+export {
+    checkExistEmployeeByEmail,
+    getEmployeeById,
+    getEmployeeByEmail,
+    createEmployee,
+    loginEmployee,
+}
