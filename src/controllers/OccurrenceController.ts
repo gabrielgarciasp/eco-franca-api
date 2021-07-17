@@ -15,6 +15,7 @@ import createOccurrenceSchema from '../schemas/Occurrence/createOccurrenceSchema
 import citizenAuthorization from '../middlewares/citizenAuthorization'
 import employeeAuthorization from '../middlewares/employeeAuthorization'
 import createOccurrenceInternalCommentSchema from '../schemas/Occurrence/createOccurrenceInternalCommentSchema'
+import updateOccurrenceSchema from '../schemas/Occurrence/updateOccurrenceSchema'
 
 const routes = Router()
 
@@ -86,12 +87,13 @@ routes.get(
     }
 )
 
-routes.put('/:occurrenceId', citizenAuthorization, async (req, res, next) => {
+routes.put('/:occurrenceId', employeeAuthorization, async (req, res, next) => {
     try {
         const occurrenceId = req.params.occurrenceId
-        const citizenId = (req as any).citizenId
+        const employeeId = (req as any).employeeId
+        const values = validate(updateOccurrenceSchema, req.body)
 
-        await removeOccurrenceNotification(occurrenceId, citizenId)
+        await updateOccurrence(occurrenceId, employeeId, values)
         res.status(200).send()
     } catch (err) {
         next(err)
