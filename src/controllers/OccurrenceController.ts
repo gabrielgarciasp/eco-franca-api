@@ -4,6 +4,7 @@ import validate from '../utils/validate'
 import {
     createOccurrence,
     getOccurrenceCitizen,
+    getOccurrencesCitizen,
 } from '../services/OccurrenceService'
 import createOccurrenceSchema from '../schemas/Occurrence/createOccurrenceSchema'
 import { crateOccurrenceRequest } from '../types/occurrence/crateOccurrenceRequest'
@@ -28,7 +29,22 @@ routes.post('/', citizenAuthorization, async (req, res, next) => {
 
 routes.get('/citizen/list', citizenAuthorization, async (req, res, next) => {
     try {
-        const result = await getOccurrenceCitizen((req as any).citizenId)
+        const citizenId = (req as any).citizenId
+
+        const result = await getOccurrencesCitizen(citizenId)
+
+        res.status(201).send(result)
+    } catch (err) {
+        next(err)
+    }
+})
+
+routes.get('/citizen/:occurrenceId', citizenAuthorization, async (req, res, next) => {
+    try {
+        const occurrenceId = req.params.occurrenceId
+        const citizenId = (req as any).citizenId
+
+        const result = await getOccurrenceCitizen(occurrenceId, citizenId)
 
         res.status(201).send(result)
     } catch (err) {

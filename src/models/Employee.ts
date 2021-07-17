@@ -8,10 +8,7 @@ export default class Employee extends User {
     @Column()
     ra: string
 
-    @Column()
-    admin: boolean
-
-    @Column()
+    @Column({ default: true })
     active: boolean
 
     @OneToMany(() => OccurrenceHistory, (reference) => reference.occurrence)

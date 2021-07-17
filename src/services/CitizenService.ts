@@ -9,6 +9,7 @@ import NotFoundError from '../exceptions/NotFoundError'
 import { loginCitizenResponse } from '../types/citizen/loginCitizenResponse'
 import { loginCitizenRequest } from '../types/citizen/loginCitizenRequest'
 import UnauthorizedError from '../exceptions/UnauthorizedError'
+import BadRequestError from '../exceptions/BadRequestError'
 
 const checkExistUserByEmailAndCpf = async (email: string, cpf: string) => {
     const repository = getRepository(Citizen)
@@ -36,7 +37,7 @@ const getUserFromCpf = async (cpf: string): Promise<Citizen> => {
         .getOne()
 
     if (result == undefined) {
-        throw new NotFoundError('CPF or Password not incorrect')
+        throw new BadRequestError('CPF or Password incorrect')
     }
 
     return result
@@ -91,18 +92,21 @@ const loginCitizen = async (
     const citizen = await getUserFromCpf(entity.cpf)
 
     if (!(await compare(entity.password, citizen.password))) {
-        throw new NotFoundError('CPF or Password incorrect')
+        throw new BadRequestError('CPF or Password incorrect')
     }
 
     if (!citizen.verified_email) {
         throw new UnauthorizedError('Email not yet verified')
     }
 
-    const token = sign({
-        citizenId: citizen.id,
-        first_name: citizen.first_name,
-        last_name: citizen.last_name,
-    })
+    const token = sign(
+        {
+            citizenId: citizen.id,
+            first_name: citizen.first_name,
+            last_name: citizen.last_name,
+        },
+        60 * 60 * 24 * 30
+    ) // 30 days
 
     return {
         first_name: citizen.first_name,

@@ -49,6 +49,9 @@ export default class Occurrence {
     @Column({ nullable: true })
     longitude: string
 
+    @Column({ default: false })
+    newNotification: boolean
+
     @CreateDateColumn()
     createdAt: Date
 

@@ -1,4 +1,6 @@
 import { getRepository } from 'typeorm'
+import ForbiddenError from '../exceptions/ForbiddenError'
+import NotFoundError from '../exceptions/NotFoundError'
 
 import Occurrence from '../models/Occurrence'
 import { crateOccurrenceRequest } from '../types/occurrence/crateOccurrenceRequest'
@@ -23,7 +25,7 @@ const createOccurrence = async (entity: crateOccurrenceRequest) => {
     repository.save(occurrence)
 }
 
-const getOccurrenceCitizen = async (
+const getOccurrencesCitizen = async (
     citizenId: string
 ): Promise<Occurrence[]> => {
     const repository = getRepository(Occurrence)
@@ -34,7 +36,30 @@ const getOccurrenceCitizen = async (
         .setParameters({
             citizenId,
         })
+        .orderBy('occurrence.newNotification', 'DESC')
+        .addOrderBy('occurrence.updatedAt', 'DESC')
         .getMany()
 }
 
-export { createOccurrence, getOccurrenceCitizen }
+const getOccurrenceCitizen = async (
+    occurrenceId: string,
+    citizenId: string
+): Promise<Occurrence | undefined> => {
+    const repository = getRepository(Occurrence)
+
+    const occurrence = await repository.findOne(occurrenceId, {
+        relations: ['citizen', 'histories', 'photos'],
+    })
+
+    if (occurrence == undefined) {
+        throw new NotFoundError('Occurrence not found')
+    }
+
+    if (occurrence.citizen.id != citizenId) {
+        throw new ForbiddenError('This occurrence does not belong to citizen')
+    }
+
+    return occurrence
+}
+
+export { createOccurrence, getOccurrencesCitizen, getOccurrenceCitizen }

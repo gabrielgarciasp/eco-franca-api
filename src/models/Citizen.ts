@@ -10,6 +10,12 @@ export default class Citizen extends User {
     @Column()
     phone_number: string
 
+    @Column()
+    verified_email: boolean
+
+    @Column({ nullable: true })
+    hash_verified_email: string
+
     @OneToMany(() => Occurrence, (occurrence) => occurrence.citizen)
     occurrences: Occurrence[]
 }
