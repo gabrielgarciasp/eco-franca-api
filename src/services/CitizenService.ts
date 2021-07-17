@@ -9,11 +9,12 @@ import Citizen from '../models/Citizen'
 import NotFoundError from '../exceptions/NotFoundError'
 import { loginCitizenResponse } from '../types/citizen/loginCitizenResponse'
 import { loginCitizenRequest } from '../types/citizen/loginCitizenRequest'
+import UnauthorizedError from '../exceptions/UnauthorizedError'
 
 const checkExistUserByEmailAndCpf = async (email: string, cpf: string) => {
     const repository = getRepository(Citizen)
 
-    const result = await repository
+    const { count } = await repository
         .createQueryBuilder('citizen')
         .select('count(1)', 'count')
         .where('citizen.email = :email')
@@ -21,7 +22,7 @@ const checkExistUserByEmailAndCpf = async (email: string, cpf: string) => {
         .setParameters({ email, cpf })
         .getRawOne()
 
-    return result.count > 0
+    return count > 0
 }
 
 const getUserFromCpf = async (cpf: string): Promise<Citizen> => {
@@ -73,7 +74,11 @@ const loginCitizen = async (
     const citizen = await getUserFromCpf(entity.cpf)
 
     if (!(await compare(entity.password, citizen.password))) {
-        throw new NotFoundError('CPF or Password not incorrect')
+        throw new NotFoundError('CPF or Password incorrect')
+    }
+
+    if (!citizen.verified_email) {
+        throw new UnauthorizedError('Email not yet verified')
     }
 
     const token = sign({
@@ -88,4 +93,27 @@ const loginCitizen = async (
     }
 }
 
-export { createCitizen, loginCitizen }
+const activeEmailCitizen = async (token: string) => {
+    const repository = getRepository(Citizen)
+
+    const citizen = await repository
+        .createQueryBuilder('citizen')
+        .where('citizen.hash_verified_email = :token')
+        .setParameters({
+            token,
+        })
+        .getOne()
+
+    if (citizen == undefined) {
+        throw new NotFoundError('Token not found')
+    }
+
+    // Não realiza um novo update, pois já está ativo
+    if (citizen.verified_email) return
+
+    citizen.verified_email = true
+
+    return repository.save(citizen)
+}
+
+export { createCitizen, loginCitizen, activeEmailCitizen }
