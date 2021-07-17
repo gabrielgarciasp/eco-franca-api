@@ -9,7 +9,7 @@ import {
 export default class User {
     @PrimaryColumn()
     @Generated('uuid')
-    id: string | undefined
+    id: string
 
     @Column({ unique: true })
     email: string
@@ -33,8 +33,8 @@ export default class User {
     hash_update_password: string
 
     @CreateDateColumn()
-    created_at: Date
+    createdAt: Date
 
     @UpdateDateColumn()
-    updated_at: Date
+    updatedAt: Date
 }
