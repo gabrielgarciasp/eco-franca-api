@@ -5,6 +5,7 @@ import NotFoundError from '../exceptions/NotFoundError'
 import Occurrence from '../models/Occurrence'
 import OccurrenceHistory from '../models/OccurrenceHistory'
 import OccurrenceInternalComment from '../models/OccurrenceInternalComment'
+import OccurrenceViolator from '../models/OccurrenceViolator'
 import { crateOccurrenceRequest } from '../types/occurrence/crateOccurrenceRequest'
 import { createOccurrenceInternalComment } from '../types/occurrence/createOccurrenceInternalComment'
 import { listEmployeeOccurrenceResponse } from '../types/occurrence/listEmployeeOccurrenceResponse'
@@ -37,7 +38,6 @@ const createOccurrence = async (
     occurrence.category = entity.category
     occurrence.status = 'created'
     occurrence.description = entity.description
-    occurrence.cep = entity.cep
     occurrence.address = entity.address
     occurrence.number = entity.number
     occurrence.district = entity.district
@@ -46,7 +46,25 @@ const createOccurrence = async (
     occurrence.longitude = entity.longitude
     occurrence.citizen = await getCitizenFromId(citizenId)
 
-    repository.save(occurrence)
+    await repository.save(occurrence)
+
+    if (
+        entity.violatorName !== undefined ||
+        entity.violatorVehicle !== undefined ||
+        entity.violatorAddress !== undefined ||
+        entity.violatorOtherInformation !== undefined
+    ) {
+        const repositoryViolator = getRepository(OccurrenceViolator)
+
+        const violator = new OccurrenceViolator()
+        violator.name = entity.violatorName
+        violator.vehicle = entity.violatorVehicle
+        violator.address = entity.violatorAddress
+        violator.otherInformation = entity.violatorOtherInformation
+        violator.occurrence = occurrence
+
+        await repositoryViolator.save(violator)
+    }
 }
 
 const getOccurrencesCitizen = async (

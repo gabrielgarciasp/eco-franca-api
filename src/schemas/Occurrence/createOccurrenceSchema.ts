@@ -3,13 +3,17 @@ import * as Yup from 'yup'
 const schema = Yup.object().shape({
     category: Yup.string().required(),
     description: Yup.string().required(),
-    cep: Yup.string(),
-    address: Yup.string(),
-    number: Yup.string(),
-    district: Yup.string(),
+    address: Yup.string().required(),
+    number: Yup.string().required(),
+    district: Yup.string().required(),
     reference: Yup.string(),
     latitude: Yup.string(),
     longitude: Yup.string(),
+    datetime: Yup.date(),
+    violatorName: Yup.string(),
+    violatorVehicle: Yup.string(),
+    violatorAddress: Yup.string(),
+    violatorOtherInformation: Yup.string(),
 })
 
 export default schema

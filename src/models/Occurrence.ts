@@ -5,6 +5,7 @@ import {
     Generated,
     ManyToOne,
     OneToMany,
+    OneToOne,
     PrimaryColumn,
     UpdateDateColumn,
 } from 'typeorm'
@@ -12,6 +13,7 @@ import Citizen from './Citizen'
 import OccurrenceHistory from './OccurrenceHistory'
 import OccurrenceInternalComment from './OccurrenceInternalComment'
 import OccurrencePhoto from './OccurrencePhoto'
+import OccurrenceViolator from './OccurrenceViolator'
 
 @Entity()
 export default class Occurrence {
@@ -27,9 +29,6 @@ export default class Occurrence {
 
     @Column()
     description: string
-
-    @Column({ nullable: true })
-    cep: string
 
     @Column({ nullable: true })
     address: string
@@ -75,4 +74,7 @@ export default class Occurrence {
 
     @OneToMany(() => OccurrencePhoto, (reference) => reference.occurrence)
     photos: OccurrenceHistory[]
+
+    @OneToOne(() => OccurrenceViolator, (relation) => relation.occurrence)
+    violator: OccurrenceViolator
 }
