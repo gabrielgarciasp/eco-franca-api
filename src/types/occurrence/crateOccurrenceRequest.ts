@@ -8,5 +8,4 @@ export type crateOccurrenceRequest = {
     reference: string
     latitude: string
     longitude: string
-    citizenId: string
 }

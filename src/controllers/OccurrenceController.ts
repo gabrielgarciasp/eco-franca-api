@@ -21,14 +21,10 @@ const routes = Router()
 
 routes.post('/', citizenAuthorization, async (req, res, next) => {
     try {
-        const values = validate(createOccurrenceSchema, {
-            ...req.body,
-            citizenId: (req as any).citizenId,
-        })
-
-        await createOccurrence(values)
-
-        res.status(201).send()
+        const citizenId = (req as any).citizenId
+        const values = validate(createOccurrenceSchema, req.body)
+        await createOccurrence(citizenId, values)
+        res.status(204).send()
     } catch (err) {
         next(err)
     }
@@ -92,9 +88,9 @@ routes.put('/:occurrenceId', employeeAuthorization, async (req, res, next) => {
         const occurrenceId = req.params.occurrenceId
         const employeeId = (req as any).employeeId
         const values = validate(updateOccurrenceSchema, req.body)
-
         await updateOccurrence(occurrenceId, employeeId, values)
-        res.status(200).send()
+
+        res.status(204).send()
     } catch (err) {
         next(err)
     }
@@ -109,7 +105,7 @@ routes.put(
             const citizenId = (req as any).citizenId
 
             await removeOccurrenceNotification(occurrenceId, citizenId)
-            res.status(200).send()
+            res.status(204).send()
         } catch (err) {
             next(err)
         }
@@ -134,7 +130,7 @@ routes.post(
                 values
             )
 
-            res.status(201).send()
+            res.status(204).send()
         } catch (err) {
             next(err)
         }

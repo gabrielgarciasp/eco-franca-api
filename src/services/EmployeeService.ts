@@ -3,6 +3,7 @@ import { getRepository } from 'typeorm'
 import BadRequestError from '../exceptions/BadRequestError'
 import ConflictError from '../exceptions/ConflictError'
 import ForbiddenError from '../exceptions/ForbiddenError'
+import NotFoundError from '../exceptions/NotFoundError'
 import Employee from '../models/Employee'
 import { createEmployeeRequest } from '../types/employee/createEmployeeRequest'
 import { loginEmployeeRequest } from '../types/employee/loginEmployeeRequest'
@@ -10,7 +11,7 @@ import { loginEmployeeResponse } from '../types/employee/loginEmployeeResponse'
 import { compare, encrypt } from '../utils/bcrypt'
 import { sign } from '../utils/jwt'
 
-const checkExistEmployeeByEmail = async (email: string) => {
+const checkExistsEmployeeByEmail = async (email: string) => {
     const repository = getRepository(Employee)
 
     const count = await repository.count({
@@ -32,23 +33,26 @@ const getEmployeeById = async (id: string): Promise<Employee> => {
     })
 
     if (employee === undefined) {
-        throw new BadRequestError('Employee not found')
+        throw new NotFoundError('Employee not found')
     }
 
     return employee
 }
 
-const getUserByEmail = async (email: string): Promise<Employee> => {
+const getEmployeeByEmail = async (
+    email: string,
+    errorMessage?: string
+): Promise<Employee> => {
     const repository = getRepository(Employee)
 
     const employee = await repository.findOne({
         where: {
-            email,
+            email: email,
         },
     })
 
     if (employee === undefined) {
-        throw new BadRequestError('Email or Password incorrect')
+        throw new NotFoundError(errorMessage || 'Employee not found')
     }
 
     return employee
@@ -57,7 +61,7 @@ const getUserByEmail = async (email: string): Promise<Employee> => {
 const createEmployee = async (entity: createEmployeeRequest) => {
     const repository = getRepository(Employee)
 
-    const existUser = await checkExistEmployeeByEmail(entity.email)
+    const existUser = await checkExistsEmployeeByEmail(entity.email)
 
     if (existUser) {
         throw new ConflictError('This email is already in use')
@@ -76,10 +80,13 @@ const createEmployee = async (entity: createEmployeeRequest) => {
 const loginEmployee = async (
     entity: loginEmployeeRequest
 ): Promise<loginEmployeeResponse> => {
-    const employee = await getUserByEmail(entity.email)
+    const employee = await getEmployeeByEmail(
+        entity.email,
+        'Email or Password incorrect'
+    )
 
     if (!(await compare(entity.password, employee.password))) {
-        throw new BadRequestError('Email or Password incorrect')
+        throw new NotFoundError('Email or Password incorrect')
     }
 
     if (!employee.active) {
@@ -92,8 +99,8 @@ const loginEmployee = async (
             first_name: employee.first_name,
             last_name: employee.last_name,
         },
-        60 * 60 * 12
-    ) // 12 hrs
+        60 * 60 * 12 // 12 hrs
+    )
 
     return {
         first_name: employee.first_name,
@@ -102,4 +109,10 @@ const loginEmployee = async (
     }
 }
 
-export { createEmployee, loginEmployee, getEmployeeById }
+export {
+    checkExistsEmployeeByEmail,
+    getEmployeeById,
+    getEmployeeByEmail,
+    createEmployee,
+    loginEmployee,
+}

@@ -7,7 +7,11 @@ import {
     createCitizen,
     loginCitizen,
     activeEmailCitizen,
+    getExistsCitizenByCpf,
+    getExistsCitizenByEmail,
 } from '../services/CitizenService'
+import checkExistsCpfSchema from '../schemas/Citizens/checkExistsCpfSchema'
+import checkExistsEmailSchema from '../schemas/Citizens/checkExistsEmailSchema'
 
 const routes = Router()
 
@@ -15,7 +19,7 @@ routes.post('/', async (req, res, next) => {
     try {
         const values = validate(createCitizenSchema, req.body)
         await createCitizen(values)
-        res.status(201).send()
+        res.status(204).send()
     } catch (err) {
         next(err)
     }
@@ -34,7 +38,27 @@ routes.post('/login', async (req, res, next) => {
 routes.post('/active/:token', async (req, res, next) => {
     try {
         await activeEmailCitizen(req.params.token)
-        res.status(200).send()
+        res.status(204).send()
+    } catch (err) {
+        next(err)
+    }
+})
+
+routes.post('/check-exists-cpf', async (req, res, next) => {
+    try {
+        const values = validate(checkExistsCpfSchema, req.body)
+        const response = await getExistsCitizenByCpf(values)
+        res.status(200).send(response)
+    } catch (err) {
+        next(err)
+    }
+})
+
+routes.post('/check-exists-email', async (req, res, next) => {
+    try {
+        const values = validate(checkExistsEmailSchema, req.body)
+        const response = await getExistsCitizenByEmail(values)
+        res.status(200).send(response)
     } catch (err) {
         next(err)
     }

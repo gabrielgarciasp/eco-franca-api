@@ -10,14 +10,14 @@ import { createOccurrenceInternalComment } from '../types/occurrence/createOccur
 import { listEmployeeOccurrenceResponse } from '../types/occurrence/listEmployeeOccurrenceResponse'
 import { updateOccurrenceRequest } from '../types/occurrence/updateOccurrenceRequest'
 import { pagination } from '../types/pagination'
-import { getUserFromId } from './CitizenService'
+import { getCitizenFromId } from './CitizenService'
 import { getEmployeeById } from './EmployeeService'
 
 const getOccurrenceById = async (occurrenceId: string): Promise<Occurrence> => {
     const repository = getRepository(Occurrence)
 
     const occurrence = await repository.findOne(occurrenceId, {
-        relations: ['citizen'],
+        relations: ['citizen', 'histories', 'photos', 'internalComments'],
     })
 
     if (occurrence === undefined) {
@@ -27,7 +27,10 @@ const getOccurrenceById = async (occurrenceId: string): Promise<Occurrence> => {
     return occurrence
 }
 
-const createOccurrence = async (entity: crateOccurrenceRequest) => {
+const createOccurrence = async (
+    citizenId: string,
+    entity: crateOccurrenceRequest
+) => {
     const repository = getRepository(Occurrence)
 
     const occurrence = new Occurrence()
@@ -41,7 +44,7 @@ const createOccurrence = async (entity: crateOccurrenceRequest) => {
     occurrence.reference = entity.reference
     occurrence.latitude = entity.latitude
     occurrence.longitude = entity.longitude
-    occurrence.citizen = await getUserFromId(entity.citizenId)
+    occurrence.citizen = await getCitizenFromId(citizenId)
 
     repository.save(occurrence)
 }
@@ -51,30 +54,24 @@ const getOccurrencesCitizen = async (
 ): Promise<Occurrence[]> => {
     const repository = getRepository(Occurrence)
 
-    return await repository
-        .createQueryBuilder('occurrence')
-        .where('occurrence.citizenId = :citizenId')
-        .setParameters({
-            citizenId,
-        })
-        .orderBy('occurrence.newNotification', 'DESC')
-        .addOrderBy('occurrence.updatedAt', 'DESC')
-        .getMany()
+    return await repository.find({
+        where: {
+            citizen: {
+                id: citizenId,
+            },
+        },
+        order: {
+            newNotification: 'DESC',
+            updatedAt: 'DESC',
+        },
+    })
 }
 
 const getOccurrenceCitizen = async (
     occurrenceId: string,
     citizenId: string
 ): Promise<Occurrence | undefined> => {
-    const repository = getRepository(Occurrence)
-
-    const occurrence = await repository.findOne(occurrenceId, {
-        relations: ['citizen', 'histories', 'photos'],
-    })
-
-    if (occurrence == undefined) {
-        throw new NotFoundError('Occurrence not found')
-    }
+    const occurrence = await getOccurrenceById(occurrenceId)
 
     if (occurrence.citizen.id != citizenId) {
         throw new ForbiddenError('This occurrence does not belong to citizen')
@@ -111,17 +108,7 @@ const getOccurrencesEmployee = async (
 const getOccurrenceEmployee = async (
     occurrenceId: string
 ): Promise<Occurrence> => {
-    const repository = getRepository(Occurrence)
-
-    const occurrence = await repository.findOne(occurrenceId, {
-        relations: ['citizen', 'histories', 'photos', 'internalComments'],
-    })
-
-    if (occurrence == undefined) {
-        throw new NotFoundError('Occurrence not found')
-    }
-
-    return occurrence
+    return await getOccurrenceById(occurrenceId)
 }
 
 const updateOccurrence = async (
@@ -145,6 +132,7 @@ const updateOccurrence = async (
     }
 
     if (occurrence.status) {
+        // create history
         const comment = new OccurrenceHistory()
         comment.previousStatus = occurrence.status
         comment.newStatus = entity.status
@@ -163,7 +151,6 @@ const updateOccurrence = async (
 
 const createHistory = async (history: OccurrenceHistory) => {
     const repository = getRepository(OccurrenceHistory)
-
     await repository.save(history)
 }
 
@@ -203,12 +190,14 @@ const removeOccurrenceNotification = async (
 }
 
 export {
+    getOccurrenceById,
     createOccurrence,
     getOccurrencesCitizen,
     getOccurrenceCitizen,
     getOccurrencesEmployee,
     getOccurrenceEmployee,
     updateOccurrence,
+    createHistory,
     createOccurrenceInternalComment,
     removeOccurrenceNotification,
 }
