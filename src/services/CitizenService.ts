@@ -129,6 +129,9 @@ const loginCitizen = async (
     return {
         first_name: citizen.first_name,
         last_name: citizen.last_name,
+        cpf: citizen.cpf,
+        phone_number: citizen.phone_number,
+        email: citizen.email,
         token,
     }
 }
