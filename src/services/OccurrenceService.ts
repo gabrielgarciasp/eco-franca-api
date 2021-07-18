@@ -1,4 +1,5 @@
 import { getRepository } from 'typeorm'
+import fs from 'fs'
 
 import ForbiddenError from '../exceptions/ForbiddenError'
 import NotFoundError from '../exceptions/NotFoundError'
@@ -16,6 +17,12 @@ import { pagination } from '../types/pagination'
 import { getCitizenFromId } from './CitizenService'
 import { getEmployeeById } from './EmployeeService'
 import { getOccurrenceEmployeeResponse } from '../types/occurrence/getOccurrenceEmployeeResponse'
+import { createOccurrenceResponse } from '../types/occurrence/createOccurrenceResponse'
+import { uploadedFile } from '../types/uploadedFile'
+import fileUpload from 'express-fileupload'
+import BadRequestError from '../exceptions/BadRequestError'
+import uuid from '../utils/uuid'
+import OccurrencePhoto from '../models/OccurrencePhoto'
 
 const getOccurrenceById = async (occurrenceId: string): Promise<Occurrence> => {
     const repository = getRepository(Occurrence)
@@ -41,7 +48,7 @@ const getOccurrenceById = async (occurrenceId: string): Promise<Occurrence> => {
 const createOccurrence = async (
     citizenId: string,
     entity: crateOccurrenceRequest
-) => {
+): Promise<createOccurrenceResponse> => {
     const repository = getRepository(Occurrence)
 
     const occurrence = new Occurrence()
@@ -75,6 +82,10 @@ const createOccurrence = async (
         violator.occurrence = occurrence
 
         await repositoryViolator.save(violator)
+    }
+
+    return {
+        id: occurrence.id,
     }
 }
 
@@ -332,6 +343,47 @@ const removeOccurrenceNotification = async (
     await repository.save(occurrence)
 }
 
+const createOccurrencePhoto = async (
+    occurrenceId: string,
+    citizenId: string,
+    files?: any
+) => {
+    const occurrence = await getOccurrenceById(occurrenceId)
+
+    if (occurrence.citizen.id != citizenId) {
+        throw new ForbiddenError('This occurrence does not belong to citizen')
+    }
+
+    const repository = getRepository(Occurrence)
+
+    const images = files.files as uploadedFile[]
+
+    await Promise.all(
+        images.map((image) => {
+            const [type, extension] = image.mimetype.split('/')
+
+            if (type === undefined || extension === undefined) {
+                throw new BadRequestError('Unsupported file')
+            }
+
+            if (type !== 'image') {
+                throw new BadRequestError('Unsupported file')
+            }
+
+            const newFileName = uuid() + '.' + extension
+
+            fs.writeFileSync('./public/' + newFileName, image.data)
+
+            const file = new OccurrencePhoto()
+            file.filaname = newFileName
+
+            occurrence.photos.push(file)
+        })
+    )
+
+    await repository.save(occurrence)
+}
+
 export {
     getOccurrenceById,
     createOccurrence,
@@ -342,4 +394,5 @@ export {
     updateOccurrence,
     createOccurrenceInternalComment,
     removeOccurrenceNotification,
+    createOccurrencePhoto,
 }

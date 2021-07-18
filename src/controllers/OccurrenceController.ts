@@ -10,6 +10,7 @@ import {
     updateOccurrence,
     removeOccurrenceNotification,
     createOccurrenceInternalComment,
+    createOccurrencePhoto,
 } from '../services/OccurrenceService'
 import createOccurrenceSchema from '../schemas/Occurrence/createOccurrenceSchema'
 import citizenAuthorization from '../middlewares/citizenAuthorization'
@@ -23,8 +24,8 @@ routes.post('/', citizenAuthorization, async (req, res, next) => {
     try {
         const citizenId = (req as any).citizenId
         const values = validate(createOccurrenceSchema, req.body)
-        await createOccurrence(citizenId, values)
-        res.status(204).send()
+        const response = await createOccurrence(citizenId, values)
+        res.status(200).send(response)
     } catch (err) {
         next(err)
     }
@@ -129,6 +130,22 @@ routes.post(
                 employeeId,
                 values
             )
+
+            res.status(204).send()
+        } catch (err) {
+            next(err)
+        }
+    }
+)
+
+routes.post(
+    '/:occurrenceId/photos',
+    citizenAuthorization,
+    async (req, res, next) => {
+        try {
+            const occurrenceId = req.params.occurrenceId
+            const citizenId = (req as any).citizenId
+            await createOccurrencePhoto(occurrenceId, citizenId, req.files)
 
             res.status(204).send()
         } catch (err) {
