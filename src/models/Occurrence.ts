@@ -80,8 +80,10 @@ export default class Occurrence {
     )
     internalComments: OccurrenceInternalComment[]
 
-    @OneToMany(() => OccurrencePhoto, (reference) => reference.occurrence)
-    photos: OccurrenceHistory[]
+    @OneToMany(() => OccurrencePhoto, (reference) => reference.occurrence, {
+        cascade: ['insert'],
+    })
+    photos: OccurrencePhoto[]
 
     @OneToOne(() => OccurrenceViolator, (relation) => relation.occurrence)
     violator: OccurrenceViolator
