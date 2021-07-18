@@ -9,7 +9,8 @@ const schema = Yup.object().shape({
     reference: Yup.string(),
     latitude: Yup.string(),
     longitude: Yup.string(),
-    datetime: Yup.date(),
+    datetime: Yup.date().required(),
+    // COLOCAR ENTIDADE COM FOTOS
     violatorName: Yup.string(),
     violatorVehicle: Yup.string(),
     violatorAddress: Yup.string(),
