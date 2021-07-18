@@ -23,8 +23,8 @@ routes.post('/', citizenAuthorization, async (req, res, next) => {
     try {
         const citizenId = (req as any).citizenId
         const values = validate(createOccurrenceSchema, req.body)
-        await createOccurrence(citizenId, values)
-        res.status(204).send()
+        const response = await createOccurrence(citizenId, values)
+        res.status(200).send(response)
     } catch (err) {
         next(err)
     }

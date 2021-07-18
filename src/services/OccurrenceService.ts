@@ -16,6 +16,7 @@ import { pagination } from '../types/pagination'
 import { getCitizenFromId } from './CitizenService'
 import { getEmployeeById } from './EmployeeService'
 import { getOccurrenceEmployeeResponse } from '../types/occurrence/getOccurrenceEmployeeResponse'
+import { createOccurrenceResponse } from '../types/occurrence/createOccurrenceResponse'
 
 const getOccurrenceById = async (occurrenceId: string): Promise<Occurrence> => {
     const repository = getRepository(Occurrence)
@@ -41,7 +42,7 @@ const getOccurrenceById = async (occurrenceId: string): Promise<Occurrence> => {
 const createOccurrence = async (
     citizenId: string,
     entity: crateOccurrenceRequest
-) => {
+): Promise<createOccurrenceResponse> => {
     const repository = getRepository(Occurrence)
 
     const occurrence = new Occurrence()
@@ -75,6 +76,10 @@ const createOccurrence = async (
         violator.occurrence = occurrence
 
         await repositoryViolator.save(violator)
+    }
+
+    return {
+        id: occurrence.id,
     }
 }
 
