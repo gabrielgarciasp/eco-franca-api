@@ -7,6 +7,7 @@ export type crateOccurrenceRequest = {
     reference: string
     latitude: string
     longitude: string
+    occurrenceDate: Date
     violatorName: string
     violatorVehicle: string
     violatorAddress: string

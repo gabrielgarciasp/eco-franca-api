@@ -9,16 +9,26 @@ import OccurrenceViolator from '../models/OccurrenceViolator'
 import { crateOccurrenceRequest } from '../types/occurrence/crateOccurrenceRequest'
 import { createOccurrenceInternalComment } from '../types/occurrence/createOccurrenceInternalComment'
 import { listEmployeeOccurrenceResponse } from '../types/occurrence/listEmployeeOccurrenceResponse'
+import { listOccurrencesCitizenResponse } from '../types/occurrence/listOccurrencesCitizenResponse'
 import { updateOccurrenceRequest } from '../types/occurrence/updateOccurrenceRequest'
+import { getOccurrenceCitizenResponse } from '../types/occurrence/getOccurrenceCitizenResponse'
 import { pagination } from '../types/pagination'
 import { getCitizenFromId } from './CitizenService'
 import { getEmployeeById } from './EmployeeService'
+import { getOccurrenceEmployeeResponse } from '../types/occurrence/getOccurrenceEmployeeResponse'
 
 const getOccurrenceById = async (occurrenceId: string): Promise<Occurrence> => {
     const repository = getRepository(Occurrence)
 
     const occurrence = await repository.findOne(occurrenceId, {
-        relations: ['citizen', 'histories', 'photos', 'internalComments'],
+        relations: [
+            'citizen',
+            'histories',
+            'photos',
+            'internalComments',
+            'internalComments.employee',
+            'violator',
+        ],
     })
 
     if (occurrence === undefined) {
@@ -44,6 +54,7 @@ const createOccurrence = async (
     occurrence.reference = entity.reference
     occurrence.latitude = entity.latitude
     occurrence.longitude = entity.longitude
+    occurrence.occurrenceDate = entity.occurrenceDate
     occurrence.citizen = await getCitizenFromId(citizenId)
 
     await repository.save(occurrence)
@@ -69,10 +80,10 @@ const createOccurrence = async (
 
 const getOccurrencesCitizen = async (
     citizenId: string
-): Promise<Occurrence[]> => {
+): Promise<listOccurrencesCitizenResponse[]> => {
     const repository = getRepository(Occurrence)
 
-    return await repository.find({
+    const occurrences = await repository.find({
         where: {
             citizen: {
                 id: citizenId,
@@ -83,19 +94,65 @@ const getOccurrencesCitizen = async (
             updatedAt: 'DESC',
         },
     })
+
+    return occurrences.map((occurrence) => ({
+        id: occurrence.id,
+        category: occurrence.category,
+        newNotification: occurrence.newNotification,
+        number: occurrence.number,
+        occurrenceNumber: occurrence.occurrenceNumber,
+        violationNumber: occurrence.violationNumber,
+        status: occurrence.status,
+        occurrenceDate: occurrence.occurrenceDate,
+    }))
 }
 
 const getOccurrenceCitizen = async (
     occurrenceId: string,
     citizenId: string
-): Promise<Occurrence | undefined> => {
+): Promise<getOccurrenceCitizenResponse> => {
     const occurrence = await getOccurrenceById(occurrenceId)
 
     if (occurrence.citizen.id != citizenId) {
         throw new ForbiddenError('This occurrence does not belong to citizen')
     }
 
-    return occurrence
+    return {
+        category: occurrence.category,
+        status: occurrence.status,
+        description: occurrence.description,
+        occurrenceDate: occurrence.occurrenceDate,
+        newNotification: occurrence.newNotification,
+        occurrenceNumber: occurrence.occurrenceNumber,
+        violationNumber: occurrence.violationNumber,
+        address: {
+            address: occurrence.address,
+            number: occurrence.number,
+            district: occurrence.district,
+            reference: occurrence.reference,
+            latitude: occurrence.latitude,
+            longitude: occurrence.longitude,
+        },
+        histories: occurrence.histories
+            .map((history) => ({
+                title: history.newStatus,
+                description: history.comment,
+                historyDate: history.createdAt,
+            }))
+            .sort((a, b) =>
+                a.historyDate.getTime() > b.historyDate.getTime()
+                    ? -1
+                    : b.historyDate.getTime() > a.historyDate.getTime()
+                    ? 1
+                    : 0
+            ),
+        violator: {
+            name: occurrence.violator.name,
+            vehicle: occurrence.violator.vehicle,
+            address: occurrence.violator.address,
+            otherInformation: occurrence.violator.otherInformation,
+        },
+    }
 }
 
 const getOccurrencesEmployee = async (
@@ -118,15 +175,83 @@ const getOccurrencesEmployee = async (
     })
 
     return {
-        occurrence: result,
+        occurrences: result.map((occurrence) => ({
+            id: occurrence.id,
+            category: occurrence.category,
+            number: occurrence.number,
+            occurrenceNumber: occurrence.occurrenceNumber,
+            violationNumber: occurrence.violationNumber,
+            status: occurrence.status,
+            occurrenceDate: occurrence.occurrenceDate,
+        })),
         pages: countTotalPages,
     }
 }
 
 const getOccurrenceEmployee = async (
     occurrenceId: string
-): Promise<Occurrence> => {
-    return await getOccurrenceById(occurrenceId)
+): Promise<getOccurrenceEmployeeResponse> => {
+    const occurrence = await getOccurrenceById(occurrenceId)
+
+    return {
+        category: occurrence.category,
+        status: occurrence.status,
+        description: occurrence.description,
+        occurrenceDate: occurrence.occurrenceDate,
+        newNotification: occurrence.newNotification,
+        occurrenceNumber: occurrence.occurrenceNumber,
+        violationNumber: occurrence.violationNumber,
+        address: {
+            address: occurrence.address,
+            number: occurrence.number,
+            district: occurrence.district,
+            reference: occurrence.reference,
+            latitude: occurrence.latitude,
+            longitude: occurrence.longitude,
+        },
+        citizen: {
+            first_name: occurrence.citizen.first_name,
+            last_name: occurrence.citizen.last_name,
+            email: occurrence.citizen.email,
+            phone_number: occurrence.citizen.phone_number,
+        },
+        histories: occurrence.histories
+            .map((history) => ({
+                title: history.newStatus,
+                description: history.comment,
+                historyDate: history.createdAt,
+            }))
+            .sort((a, b) =>
+                a.historyDate.getTime() > b.historyDate.getTime()
+                    ? -1
+                    : b.historyDate.getTime() > a.historyDate.getTime()
+                    ? 1
+                    : 0
+            ),
+        photos: [],
+        violator: {
+            name: occurrence.violator.name,
+            vehicle: occurrence.violator.vehicle,
+            address: occurrence.violator.address,
+            otherInformation: occurrence.violator.otherInformation,
+        },
+        internalComments: occurrence.internalComments
+            .map((internalComment) => ({
+                comment: internalComment.comment,
+                employee:
+                    internalComment.employee.first_name +
+                    ' ' +
+                    internalComment.employee.last_name,
+                commentDate: internalComment.createdAt,
+            }))
+            .sort((a, b) =>
+                a.commentDate.getTime() > b.commentDate.getTime()
+                    ? -1
+                    : b.commentDate.getTime() > a.commentDate.getTime()
+                    ? 1
+                    : 0
+            ),
+    }
 }
 
 const updateOccurrence = async (
@@ -144,6 +269,11 @@ const updateOccurrence = async (
         occurrence.newNotification = true
     }
 
+    if (occurrence.occurrenceNumber !== undefined) {
+        occurrence.violationNumber = entity.occurrenceNumber
+        occurrence.newNotification = true
+    }
+
     if (occurrence.violationNumber !== undefined) {
         occurrence.violationNumber = entity.violationNumber
         occurrence.newNotification = true
@@ -158,18 +288,13 @@ const updateOccurrence = async (
         comment.occurrence = occurrence
         comment.employee = employee
 
-        await createHistory(comment)
+        occurrence.histories.push(comment)
 
         occurrence.status = entity.status
         occurrence.newNotification = true
     }
 
     await repository.save(occurrence)
-}
-
-const createHistory = async (history: OccurrenceHistory) => {
-    const repository = getRepository(OccurrenceHistory)
-    await repository.save(history)
 }
 
 const createOccurrenceInternalComment = async (
@@ -215,7 +340,6 @@ export {
     getOccurrencesEmployee,
     getOccurrenceEmployee,
     updateOccurrence,
-    createHistory,
     createOccurrenceInternalComment,
     removeOccurrenceNotification,
 }
