@@ -37,9 +37,6 @@ export default class Occurrence {
     number: string
 
     @Column({ nullable: true })
-    violationNumber: string
-
-    @Column({ nullable: true })
     district: string
 
     @Column({ nullable: true })
@@ -51,8 +48,17 @@ export default class Occurrence {
     @Column({ nullable: true })
     longitude: string
 
+    @Column()
+    occurrenceDate: Date
+
     @Column({ default: false })
     newNotification: boolean
+
+    @Column({ nullable: true })
+    occurrenceNumber: string
+
+    @Column({ nullable: true })
+    violationNumber: string
 
     @CreateDateColumn()
     createdAt: Date
@@ -63,7 +69,9 @@ export default class Occurrence {
     @ManyToOne(() => Citizen, (citizen) => citizen.occurrences)
     citizen: Citizen
 
-    @OneToMany(() => OccurrenceHistory, (reference) => reference.occurrence)
+    @OneToMany(() => OccurrenceHistory, (reference) => reference.occurrence, {
+        cascade: ['insert'],
+    })
     histories: OccurrenceHistory[]
 
     @OneToMany(

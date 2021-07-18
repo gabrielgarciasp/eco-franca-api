@@ -1,14 +1,10 @@
-type responseOccurrence = {
+export type listOccurrencesCitizenResponse = {
     id: string
     category: string
+    newNotification: boolean
     number: string
     occurrenceNumber: string
     violationNumber: string
     status: string
     occurrenceDate: Date
-}
-
-export type listEmployeeOccurrenceResponse = {
-    occurrences: responseOccurrence[]
-    pages: number
 }
