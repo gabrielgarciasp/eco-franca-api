@@ -14,6 +14,8 @@ import { checkExistsCpfCitizenResponse } from '../types/employee/checkExistsCpfC
 import { checkExistsEmailCitizenRequest } from '../types/employee/checkExistsEmailCitizenRequest'
 import { checkExistsEmailCitizenResponse } from '../types/employee/checkExistsEmailCitizenResponse'
 import ForbiddenError from '../exceptions/ForbiddenError'
+import { sendMail } from '../utils/sendMail'
+import templateEmail from '../emails/verifyEmail'
 
 const checkExistsUserByEmailAndCpf = async (email: string, cpf: string) => {
     const repository = getRepository(Citizen)
@@ -90,6 +92,13 @@ const createCitizen = async (entity: createCitizenRequest) => {
     citizen.phone_number = entity.phone_number
 
     await repository.save(citizen)
+
+    const bodyEmail = templateEmail(
+        citizen.first_name,
+        citizen.hash_verified_email
+    )
+
+    await sendMail(entity.email, 'Verificar E-mail', bodyEmail)
 }
 
 const loginCitizen = async (
