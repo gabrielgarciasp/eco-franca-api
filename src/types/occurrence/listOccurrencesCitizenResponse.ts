@@ -1,8 +1,17 @@
+type address = {
+    address: string
+    number: string
+    district: string
+    reference: string
+    latitude: string
+    longitude: string
+}
+
 export type listOccurrencesCitizenResponse = {
     id: string
     category: string
     newNotification: boolean
-    number: string
+    address: address
     occurrenceNumber: string
     violationNumber: string
     status: string

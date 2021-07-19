@@ -24,5 +24,6 @@ app.use(
 )
 app.use(json())
 app.use(routes)
+app.use('/public', express.static('public'))
 
 export default app
