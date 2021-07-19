@@ -15,6 +15,6 @@ createConnection({
         console.log('✔️ Database connected')
     })
     .catch((error) => {
-        console.log('❌ Database failed to connect')
-        console.log(error)
+        console.error('❌ Database failed to connect')
+        console.error(error)
     })

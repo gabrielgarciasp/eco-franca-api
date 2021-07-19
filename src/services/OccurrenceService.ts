@@ -391,6 +391,39 @@ const updateOccurrenceDeleteImages = async (occurrenceId: string) => {
     repository.save(occurrence)
 }
 
+const getPhotosToDelete = async (): Promise<Occurrence[]> => {
+    const repository = getRepository(Occurrence)
+
+    return await repository.find({
+        where: {
+            deleteImages: true,
+        },
+        relations: ['photos'],
+    })
+}
+
+const deletePhotos = async (occurrenceId: string) => {
+    const repository = getRepository(Occurrence)
+
+    const occurrence = await getOccurrenceById(occurrenceId)
+    occurrence.deleteImages = false
+
+    await repository.save(occurrence)
+
+    // delete entity photos
+    const repositoryPhoto = getRepository(OccurrencePhoto)
+
+    const photos = await repositoryPhoto.find({
+        where: {
+            occurrence: {
+                id: occurrence.id,
+            },
+        },
+    })
+
+    await repositoryPhoto.remove(photos)
+}
+
 export {
     getOccurrenceById,
     createOccurrence,
@@ -403,4 +436,6 @@ export {
     removeOccurrenceNotification,
     createOccurrencePhoto,
     updateOccurrenceDeleteImages,
+    getPhotosToDelete,
+    deletePhotos,
 }
