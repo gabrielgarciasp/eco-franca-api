@@ -52,3 +52,7 @@ export type getOccurrenceEmployeeResponse = {
     violator: violator
     internalComments: internalComment[]
 }
+
+export type getOccurrenceEmployeeByIdResponse = {
+    id: string
+}

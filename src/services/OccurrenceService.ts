@@ -16,7 +16,7 @@ import { getOccurrenceCitizenResponse } from '../types/occurrence/getOccurrenceC
 import { pagination } from '../types/pagination'
 import { getCitizenFromId } from './CitizenService'
 import { getEmployeeById } from './EmployeeService'
-import { getOccurrenceEmployeeResponse } from '../types/occurrence/getOccurrenceEmployeeResponse'
+import { getOccurrenceEmployeeByIdResponse, getOccurrenceEmployeeResponse } from '../types/occurrence/getOccurrenceEmployeeResponse'
 import { createOccurrenceResponse } from '../types/occurrence/createOccurrenceResponse'
 import { uploadedFile } from '../types/uploadedFile'
 import BadRequestError from '../exceptions/BadRequestError'
@@ -288,6 +288,29 @@ const getOccurrenceEmployee = async (
     }
 }
 
+const getOccurrenceEmployeeByNumber = async (
+    number: string
+): Promise<getOccurrenceEmployeeByIdResponse> => {
+
+    const repository = getRepository(Occurrence)
+
+    const occurrence = await repository.findOne({
+        where: {
+            occurrenceNumber: number,
+        }
+    })
+
+    if (occurrence === undefined) {
+        throw new NotFoundError('Occurrence not found')
+    }
+
+    return {
+        id: occurrence.id,
+    }
+}
+
+
+
 const updateOccurrence = async (
     occurrenceId: string,
     employeeId: string,
@@ -455,6 +478,7 @@ export {
     getOccurrenceCitizen,
     getOccurrencesEmployee,
     getOccurrenceEmployee,
+    getOccurrenceEmployeeByNumber,
     updateOccurrence,
     createOccurrenceInternalComment,
     removeOccurrenceNotification,

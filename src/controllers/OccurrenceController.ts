@@ -12,6 +12,7 @@ import {
     createOccurrenceInternalComment,
     createOccurrencePhoto,
     updateOccurrenceDeleteImages,
+    getOccurrenceEmployeeByNumber,
 } from '../services/OccurrenceService'
 import createOccurrenceSchema from '../schemas/Occurrence/createOccurrenceSchema'
 import citizenAuthorization from '../middlewares/citizenAuthorization'
@@ -78,6 +79,20 @@ routes.get(
     async (req, res, next) => {
         try {
             const result = await getOccurrenceEmployee(req.params.occurrenceId)
+            res.status(200).send(result)
+        } catch (err) {
+            next(err)
+        }
+    }
+)
+
+
+routes.get(
+    '/employee/number/:occurrenceNumber',
+    employeeAuthorization,
+    async (req, res, next) => {
+        try {
+            const result = await getOccurrenceEmployeeByNumber(req.params.occurrenceNumber)
             res.status(200).send(result)
         } catch (err) {
             next(err)
