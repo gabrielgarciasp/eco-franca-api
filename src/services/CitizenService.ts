@@ -17,8 +17,8 @@ import ForbiddenError from '../exceptions/ForbiddenError'
 import { sendMail } from '../utils/sendMail'
 import templateVerifyEmail from '../emails/verifyEmail'
 import templateRecoveryPassword from '../emails/recoveryPassword'
-import { checkCpfIsNotNullSchema } from '../types/employee/checkCpfIsNotNullSchema'
-import { checkPasswordIsNotNullSchema } from '../types/employee/checkPasswordIsNotNullSchema'
+import { checkCpfIsNotNullRequest } from '../types/employee/checkCpfIsNotNullRequest'
+import { checkPasswordIsNotNullCitizenRequest } from '../types/employee/checkPasswordIsNotNullCitizenRequest'
 
 const checkExistsUserByEmailAndCpf = async (email: string, cpf: string) => {
     const repository = getRepository(Citizen)
@@ -120,7 +120,9 @@ const createCitizen = async (entity: createCitizenRequest) => {
         citizen.hash_verified_email
     )
 
-    await sendMail(entity.email, 'Verificar E-mail', bodyEmail)
+    if (process.env.SEND_EMAIL == 'true') {
+        sendMail(entity.email, 'Verificar E-mail', bodyEmail)
+    }
 }
 
 const loginCitizen = async (
@@ -208,7 +210,7 @@ const getExistsCitizenByEmail = async (
     }
 }
 
-const revoceryPasswordCitizen = async (entity: checkCpfIsNotNullSchema) => {
+const revoceryPasswordCitizen = async (entity: checkCpfIsNotNullRequest) => {
     const repository = getRepository(Citizen)
     const citizen = await getCitizenFromCpf(entity.cpf)
 
@@ -221,11 +223,13 @@ const revoceryPasswordCitizen = async (entity: checkCpfIsNotNullSchema) => {
         citizen.hash_update_password
     )
 
-    sendMail(citizen.email, 'Recuperar Senha EcoFranca', bodyEmail)
+    if (process.env.SEND_EMAIL == 'true') {
+        sendMail(citizen.email, 'Recuperar Senha EcoFranca', bodyEmail)
+    }
 }
 
 const changePasswordCitizen = async (
-    entity: checkPasswordIsNotNullSchema,
+    entity: checkPasswordIsNotNullCitizenRequest,
     hash: string
 ) => {
     const repository = getRepository(Citizen)
