@@ -157,10 +157,10 @@ const getOccurrenceCitizen = async (
                     : 0
             ),
         violator: {
-            name: occurrence.violator.name,
-            vehicle: occurrence.violator.vehicle,
-            address: occurrence.violator.address,
-            otherInformation: occurrence.violator.otherInformation,
+            name: occurrence?.violator?.name,
+            vehicle: occurrence?.violator?.vehicle,
+            address: occurrence?.violator?.address,
+            otherInformation: occurrence?.violator?.otherInformation,
         },
     }
 }
@@ -240,10 +240,10 @@ const getOccurrenceEmployee = async (
             ),
         photos: [],
         violator: {
-            name: occurrence.violator.name,
-            vehicle: occurrence.violator.vehicle,
-            address: occurrence.violator.address,
-            otherInformation: occurrence.violator.otherInformation,
+            name: occurrence?.violator?.name,
+            vehicle: occurrence?.violator?.vehicle,
+            address: occurrence?.violator?.address,
+            otherInformation: occurrence?.violator?.otherInformation,
         },
         internalComments: occurrence.internalComments
             .map((internalComment) => ({

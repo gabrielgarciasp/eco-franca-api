@@ -86,5 +86,5 @@ export default class Occurrence {
     photos: OccurrencePhoto[]
 
     @OneToOne(() => OccurrenceViolator, (relation) => relation.occurrence)
-    violator: OccurrenceViolator
+    violator?: OccurrenceViolator
 }

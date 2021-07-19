@@ -16,10 +16,10 @@ type photos = {
 }
 
 type violator = {
-    name: string
-    vehicle: string
-    address: string
-    otherInformation: string
+    name: string | undefined
+    vehicle: string | undefined
+    address: string | undefined
+    otherInformation: string | undefined
 }
 
 type address = {

@@ -98,7 +98,9 @@ const createCitizen = async (entity: createCitizenRequest) => {
         citizen.hash_verified_email
     )
 
-    await sendMail(entity.email, 'Verificar E-mail', bodyEmail)
+    if (process.env.SEND_EMAIL == 'true') {
+        await sendMail(entity.email, 'Verificar E-mail', bodyEmail)
+    }
 }
 
 const loginCitizen = async (
