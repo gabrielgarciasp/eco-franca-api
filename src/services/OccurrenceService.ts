@@ -19,7 +19,6 @@ import { getEmployeeById } from './EmployeeService'
 import { getOccurrenceEmployeeResponse } from '../types/occurrence/getOccurrenceEmployeeResponse'
 import { createOccurrenceResponse } from '../types/occurrence/createOccurrenceResponse'
 import { uploadedFile } from '../types/uploadedFile'
-import fileUpload from 'express-fileupload'
 import BadRequestError from '../exceptions/BadRequestError'
 import uuid from '../utils/uuid'
 import OccurrencePhoto from '../models/OccurrencePhoto'
@@ -53,7 +52,7 @@ const createOccurrence = async (
 
     const occurrence = new Occurrence()
     occurrence.category = entity.category
-    occurrence.status = 'created'
+    occurrence.status = 'SolicitacaoCriada'
     occurrence.description = entity.description
     occurrence.address = entity.address
     occurrence.number = entity.number
