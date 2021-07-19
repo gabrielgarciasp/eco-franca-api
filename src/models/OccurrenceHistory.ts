@@ -22,7 +22,7 @@ export default class OccurrenceHistory {
     @Column()
     newStatus: string
 
-    @Column()
+    @Column({ nullable: true })
     comment: string
 
     @CreateDateColumn()

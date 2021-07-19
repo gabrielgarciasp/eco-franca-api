@@ -83,6 +83,14 @@ const createOccurrence = async (
         await repositoryViolator.save(violator)
     }
 
+    const history = new OccurrenceHistory()
+    history.previousStatus = occurrence.status
+    history.newStatus = occurrence.status
+    history.occurrence = occurrence
+
+    const repositoryHistory = getRepository(OccurrenceHistory)
+    repositoryHistory.save(history)
+
     return {
         id: occurrence.id,
     }
