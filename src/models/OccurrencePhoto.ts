@@ -10,6 +10,6 @@ export default class OccurrencePhoto {
     @Column()
     filaname: string
 
-    @ManyToOne(() => Occurrence, (reference) => reference.histories)
+    @ManyToOne(() => Occurrence, (reference) => reference.photos)
     occurrence: Occurrence
 }

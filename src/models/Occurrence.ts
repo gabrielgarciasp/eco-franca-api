@@ -60,6 +60,9 @@ export default class Occurrence {
     @Column({ nullable: true })
     violationNumber: string
 
+    @Column({ default: false })
+    deleteImages: boolean
+
     @CreateDateColumn()
     createdAt: Date
 
@@ -80,9 +83,11 @@ export default class Occurrence {
     )
     internalComments: OccurrenceInternalComment[]
 
-    @OneToMany(() => OccurrencePhoto, (reference) => reference.occurrence)
-    photos: OccurrenceHistory[]
+    @OneToMany(() => OccurrencePhoto, (reference) => reference.occurrence, {
+        cascade: ['insert'],
+    })
+    photos: OccurrencePhoto[]
 
     @OneToOne(() => OccurrenceViolator, (relation) => relation.occurrence)
-    violator: OccurrenceViolator
+    violator?: OccurrenceViolator
 }

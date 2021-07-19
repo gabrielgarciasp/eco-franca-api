@@ -2,3 +2,6 @@
 /dist
 /node_modules
 /.env
+/public
+yarn.lock
+package-lock.json
