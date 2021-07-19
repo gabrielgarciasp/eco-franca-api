@@ -383,6 +383,14 @@ const createOccurrencePhoto = async (
     await repository.save(occurrence)
 }
 
+const updateOccurrenceDeleteImages = async (occurrenceId: string) => {
+    const occurrence = await getOccurrenceById(occurrenceId)
+    occurrence.deleteImages = true
+
+    const repository = getRepository(Occurrence)
+    repository.save(occurrence)
+}
+
 export {
     getOccurrenceById,
     createOccurrence,
@@ -394,4 +402,5 @@ export {
     createOccurrenceInternalComment,
     removeOccurrenceNotification,
     createOccurrencePhoto,
+    updateOccurrenceDeleteImages,
 }

@@ -60,6 +60,9 @@ export default class Occurrence {
     @Column({ nullable: true })
     violationNumber: string
 
+    @Column({ default: false })
+    deleteImages: boolean
+
     @CreateDateColumn()
     createdAt: Date
 
