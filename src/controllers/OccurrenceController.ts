@@ -97,7 +97,7 @@ routes.put('/:occurrenceId', employeeAuthorization, async (req, res, next) => {
     }
 })
 
-routes.put(
+routes.patch(
     '/:occurrenceId/remove-notification',
     citizenAuthorization,
     async (req, res, next) => {
