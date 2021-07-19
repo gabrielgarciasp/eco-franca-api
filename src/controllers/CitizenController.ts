@@ -80,7 +80,7 @@ routes.post('/recovery-password', async (req, res, next) => {
     }
 })
 
-routes.put('/change-password/:hash', async (req, res, next) => {
+routes.patch('/recovery-password/:hash', async (req, res, next) => {
     try {
         const values = validate(checkPassworIsNotNullSchema, req.body)
         const { hash } = req.params
