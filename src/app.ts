@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 import './configs/database'
+import './utils/tasks'
 
 import express, { json } from 'express'
 import helmet from 'helmet'
