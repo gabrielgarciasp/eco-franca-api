@@ -15,7 +15,10 @@ import { checkExistsEmailCitizenRequest } from '../types/employee/checkExistsEma
 import { checkExistsEmailCitizenResponse } from '../types/employee/checkExistsEmailCitizenResponse'
 import ForbiddenError from '../exceptions/ForbiddenError'
 import { sendMail } from '../utils/sendMail'
-import templateEmail from '../emails/verifyEmail'
+import templateVerifyEmail from '../emails/verifyEmail'
+import templateRecoveryPassword from '../emails/recoveryPassword'
+import { checkCpfIsNotNullRequest } from '../types/employee/checkCpfIsNotNullRequest'
+import { checkPasswordIsNotNullCitizenRequest } from '../types/employee/checkPasswordIsNotNullCitizenRequest'
 
 const checkExistsUserByEmailAndCpf = async (email: string, cpf: string) => {
     const repository = getRepository(Citizen)
@@ -69,6 +72,25 @@ const getCitizenFromCpf = async (
     return result
 }
 
+const getCitizenFromHash = async (
+    hash_update_password: string,
+    errorMessage?: string
+): Promise<Citizen> => {
+    const repository = getRepository(Citizen)
+
+    const result = await repository.findOne({
+        where: {
+            hash_update_password,
+        },
+    })
+
+    if (result == undefined) {
+        throw new NotFoundError(errorMessage || 'Citizen not found')
+    }
+
+    return result
+}
+
 const createCitizen = async (entity: createCitizenRequest) => {
     const repository = getRepository(Citizen)
 
@@ -93,13 +115,13 @@ const createCitizen = async (entity: createCitizenRequest) => {
 
     await repository.save(citizen)
 
-    const bodyEmail = templateEmail(
+    const bodyEmail = templateVerifyEmail(
         citizen.first_name,
         citizen.hash_verified_email
     )
 
     if (process.env.SEND_EMAIL == 'true') {
-        await sendMail(entity.email, 'Verificar E-mail', bodyEmail)
+        sendMail(entity.email, 'Verificar E-mail', bodyEmail)
     }
 }
 
@@ -191,6 +213,37 @@ const getExistsCitizenByEmail = async (
     }
 }
 
+const revoceryPasswordCitizen = async (entity: checkCpfIsNotNullRequest) => {
+    const repository = getRepository(Citizen)
+    const citizen = await getCitizenFromCpf(entity.cpf)
+
+    citizen.hash_update_password = uuid()
+
+    await repository.save(citizen)
+
+    const bodyEmail = templateRecoveryPassword(
+        citizen.first_name,
+        citizen.hash_update_password
+    )
+
+    if (process.env.SEND_EMAIL == 'true') {
+        sendMail(citizen.email, 'Recuperar Senha EcoFranca', bodyEmail)
+    }
+}
+
+const changePasswordCitizen = async (
+    entity: checkPasswordIsNotNullCitizenRequest,
+    hash: string
+) => {
+    const repository = getRepository(Citizen)
+    const citizen = await getCitizenFromHash(hash)
+
+    citizen.hash_update_password = ''
+    citizen.password = await encrypt(entity.password)
+
+    await repository.save(citizen)
+}
+
 export {
     checkExistsUserByEmailAndCpf,
     getCitizenFromId,
@@ -200,4 +253,6 @@ export {
     activeEmailCitizen,
     getExistsCitizenByCpf,
     getExistsCitizenByEmail,
+    revoceryPasswordCitizen,
+    changePasswordCitizen,
 }

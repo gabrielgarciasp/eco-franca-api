@@ -24,7 +24,7 @@ export default class User {
     last_name: string
 
     @Column({ nullable: true })
-    hash_update_password: string
+    hash_update_password?: string
 
     @CreateDateColumn()
     createdAt: Date

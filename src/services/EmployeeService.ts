@@ -5,11 +5,16 @@ import ConflictError from '../exceptions/ConflictError'
 import ForbiddenError from '../exceptions/ForbiddenError'
 import NotFoundError from '../exceptions/NotFoundError'
 import Employee from '../models/Employee'
+import { checkEmailIsNotNullEmployeeRequest } from '../types/employee/checkEmailIsNotNullEmployeeRequest'
 import { createEmployeeRequest } from '../types/employee/createEmployeeRequest'
 import { loginEmployeeRequest } from '../types/employee/loginEmployeeRequest'
 import { loginEmployeeResponse } from '../types/employee/loginEmployeeResponse'
 import { compare, encrypt } from '../utils/bcrypt'
 import { sign } from '../utils/jwt'
+import { sendMail } from '../utils/sendMail'
+import uuid from '../utils/uuid'
+import templateRecoveryPassword from '../emails/recoveryPassword'
+import { checkPasswordIsNotNullEmployeeRequest } from '../types/employee/checkPasswordIsNotNullEmployeeRequest'
 
 const checkExistsEmployeeByEmail = async (email: string) => {
     const repository = getRepository(Employee)
@@ -48,6 +53,25 @@ const getEmployeeByEmail = async (
     const employee = await repository.findOne({
         where: {
             email: email,
+        },
+    })
+
+    if (employee === undefined) {
+        throw new NotFoundError(errorMessage || 'Employee not found')
+    }
+
+    return employee
+}
+
+const getEmployeeByHash = async (
+    hash: string,
+    errorMessage?: string
+): Promise<Employee> => {
+    const repository = getRepository(Employee)
+
+    const employee = await repository.findOne({
+        where: {
+            hash_update_password: hash,
         },
     })
 
@@ -109,10 +133,45 @@ const loginEmployee = async (
     }
 }
 
+const revoceryPasswordEmployee = async (
+    entity: checkEmailIsNotNullEmployeeRequest
+) => {
+    const repository = getRepository(Employee)
+    const employee = await getEmployeeByEmail(entity.email)
+
+    employee.hash_update_password = uuid()
+
+    await repository.save(employee)
+
+    const bodyEmail = templateRecoveryPassword(
+        employee.first_name,
+        employee.hash_update_password
+    )
+
+    if (process.env.SEND_EMAIL == 'true') {
+        sendMail(employee.email, 'Recuperar Senha EcoFranca', bodyEmail)
+    }
+}
+
+const changePasswordEmployee = async (
+    entity: checkPasswordIsNotNullEmployeeRequest,
+    hash: string
+) => {
+    const repository = getRepository(Employee)
+    const employee = await getEmployeeByHash(hash)
+
+    employee.hash_update_password = ''
+    employee.password = await encrypt(entity.password)
+
+    await repository.save(employee)
+}
+
 export {
     checkExistsEmployeeByEmail,
     getEmployeeById,
     getEmployeeByEmail,
     createEmployee,
     loginEmployee,
+    revoceryPasswordEmployee,
+    changePasswordEmployee,
 }
