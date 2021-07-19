@@ -117,7 +117,14 @@ const getOccurrencesCitizen = async (
         id: occurrence.id,
         category: occurrence.category,
         newNotification: occurrence.newNotification,
-        number: occurrence.number,
+        address: {
+            address: occurrence.address,
+            number: occurrence.number,
+            district: occurrence.district,
+            reference: occurrence.reference,
+            latitude: occurrence.latitude,
+            longitude: occurrence.longitude,
+        },
         occurrenceNumber: occurrence.occurrenceNumber,
         violationNumber: occurrence.violationNumber,
         status: occurrence.status,
@@ -196,7 +203,14 @@ const getOccurrencesEmployee = async (
         occurrences: result.map((occurrence) => ({
             id: occurrence.id,
             category: occurrence.category,
-            number: occurrence.number,
+            address: {
+                address: occurrence.address,
+                number: occurrence.number,
+                district: occurrence.district,
+                reference: occurrence.reference,
+                latitude: occurrence.latitude,
+                longitude: occurrence.longitude,
+            },
             occurrenceNumber: occurrence.occurrenceNumber,
             violationNumber: occurrence.violationNumber,
             status: occurrence.status,
@@ -246,7 +260,9 @@ const getOccurrenceEmployee = async (
                     ? 1
                     : 0
             ),
-        photos: [],
+        photos: occurrence.photos.map(
+            (photo) => process.env.URL_PHOTOS + '/' + photo.filaname
+        ),
         violator: {
             name: occurrence?.violator?.name,
             vehicle: occurrence?.violator?.vehicle,

@@ -48,7 +48,7 @@ export type getOccurrenceEmployeeResponse = {
     address: address
     citizen: citizen
     histories: history[]
-    photos: photos[]
+    photos: string[]
     violator: violator
     internalComments: internalComment[]
 }
