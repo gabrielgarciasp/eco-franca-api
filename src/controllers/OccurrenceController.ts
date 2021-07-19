@@ -64,7 +64,10 @@ routes.get('/employee/list', employeeAuthorization, async (req, res, next) => {
             limit: parseInt(req.query.limit as string),
         }
 
-        const result = await getOccurrencesEmployee(pagination)
+        const filter = req.query.filter as string
+        const search = req.query.search as string
+
+        const result = await getOccurrencesEmployee(pagination, filter, search)
 
         res.status(200).send(result)
     } catch (err) {

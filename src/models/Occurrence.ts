@@ -63,6 +63,9 @@ export default class Occurrence {
     @Column({ default: false })
     deleteImages: boolean
 
+    @Column({ default: false })
+    viewed: boolean
+
     @CreateDateColumn()
     createdAt: Date
 
