@@ -1,4 +1,4 @@
-import { getRepository } from 'typeorm'
+import { FindConditions, getRepository, Like } from 'typeorm'
 import fs from 'fs'
 
 import ForbiddenError from '../exceptions/ForbiddenError'
@@ -181,20 +181,40 @@ const getOccurrenceCitizen = async (
 }
 
 const getOccurrencesEmployee = async (
-    pagination: pagination
+    pagination: pagination,
+    filter: string,
+    search: string
 ): Promise<listEmployeeOccurrenceResponse> => {
     const repository = getRepository(Occurrence)
 
     const page = pagination.page >= 0 ? pagination.page : 0
     const limit = pagination.limit >= 0 ? pagination.limit : 10
 
-    const countTotalRows = await repository.count()
+    const where: FindConditions<Occurrence>[] = []
+    const whereAnd: FindConditions<Occurrence> = {}
+
+    if (filter !== undefined) {
+        if (filter === 'read') {
+            whereAnd.viewed = true
+        } else if (filter === 'unread') {
+            whereAnd.viewed = false
+        }
+    }
+
+    if (Object.keys(whereAnd).length > 0) {
+        where.push(whereAnd)
+    }
+
+    const countTotalRows = await repository.count({
+        where,
+    })
     const countTotalPages = Math.ceil(countTotalRows / limit)
 
     const result = await repository.find({
         order: {
             updatedAt: 'ASC',
         },
+        where: where,
         take: limit,
         skip: page * limit,
     })
@@ -321,22 +341,17 @@ const updateOccurrence = async (
     const employee = await getEmployeeById(employeeId)
     const occurrence = await getOccurrenceById(occurrenceId)
 
-    if (occurrence.number !== undefined) {
-        occurrence.number = entity.number
+    if (entity.occurrenceNumber !== undefined) {
+        occurrence.occurrenceNumber = entity.occurrenceNumber
         occurrence.newNotification = true
     }
 
-    if (occurrence.occurrenceNumber !== undefined) {
-        occurrence.violationNumber = entity.occurrenceNumber
-        occurrence.newNotification = true
-    }
-
-    if (occurrence.violationNumber !== undefined) {
+    if (entity.violationNumber !== undefined) {
         occurrence.violationNumber = entity.violationNumber
         occurrence.newNotification = true
     }
 
-    if (occurrence.status) {
+    if (entity.status !== undefined) {
         // create history
         const comment = new OccurrenceHistory()
         comment.previousStatus = occurrence.status
@@ -432,7 +447,11 @@ const createOccurrencePhoto = async (
 
 const updateOccurrenceDeleteImages = async (occurrenceId: string) => {
     const occurrence = await getOccurrenceById(occurrenceId)
+
+    if (occurrence.viewed) return
+
     occurrence.deleteImages = true
+    occurrence.viewed = true
 
     const repository = getRepository(Occurrence)
     repository.save(occurrence)
