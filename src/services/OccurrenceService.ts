@@ -298,22 +298,17 @@ const updateOccurrence = async (
     const employee = await getEmployeeById(employeeId)
     const occurrence = await getOccurrenceById(occurrenceId)
 
-    if (occurrence.number !== undefined) {
-        occurrence.number = entity.number
+    if (entity.occurrenceNumber !== undefined) {
+        occurrence.occurrenceNumber = entity.occurrenceNumber
         occurrence.newNotification = true
     }
 
-    if (occurrence.occurrenceNumber !== undefined) {
-        occurrence.violationNumber = entity.occurrenceNumber
-        occurrence.newNotification = true
-    }
-
-    if (occurrence.violationNumber !== undefined) {
+    if (entity.violationNumber !== undefined) {
         occurrence.violationNumber = entity.violationNumber
         occurrence.newNotification = true
     }
 
-    if (occurrence.status) {
+    if (entity.status !== undefined) {
         // create history
         const comment = new OccurrenceHistory()
         comment.previousStatus = occurrence.status
