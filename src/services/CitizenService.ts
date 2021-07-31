@@ -213,7 +213,7 @@ const getExistsCitizenByEmail = async (
     }
 }
 
-const revoceryPasswordCitizen = async (entity: checkCpfIsNotNullRequest) => {
+const recoveryPasswordCitizen = async (entity: checkCpfIsNotNullRequest) => {
     const repository = getRepository(Citizen)
     const citizen = await getCitizenFromCpf(entity.cpf)
 
@@ -221,9 +221,11 @@ const revoceryPasswordCitizen = async (entity: checkCpfIsNotNullRequest) => {
 
     await repository.save(citizen)
 
+    const urlChangePassword = `${process.env.URL_RECOVERY_PASSWORD}/${citizen.hash_update_password}`
+
     const bodyEmail = templateRecoveryPassword(
         citizen.first_name,
-        citizen.hash_update_password
+        urlChangePassword
     )
 
     if (process.env.SEND_EMAIL == 'true') {
@@ -253,6 +255,6 @@ export {
     activeEmailCitizen,
     getExistsCitizenByCpf,
     getExistsCitizenByEmail,
-    revoceryPasswordCitizen,
+    recoveryPasswordCitizen,
     changePasswordCitizen,
 }

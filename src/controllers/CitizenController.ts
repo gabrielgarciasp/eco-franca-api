@@ -9,13 +9,13 @@ import {
     activeEmailCitizen,
     getExistsCitizenByCpf,
     getExistsCitizenByEmail,
-    revoceryPasswordCitizen,
+    recoveryPasswordCitizen,
     changePasswordCitizen,
 } from '../services/CitizenService'
 import checkExistsCpfSchema from '../schemas/Citizens/checkExistsCpfSchema'
 import checkExistsEmailSchema from '../schemas/Citizens/checkExistsEmailSchema'
 import checkCpfIsNotNullSchema from '../schemas/Citizens/checkCpfIsNotNullSchema'
-import checkPassworIsNotNullSchema from '../schemas/Citizens/checkPassworIsNotNullSchema'
+import checkPasswordIsNotNullSchema from '../schemas/Citizens/checkPasswordIsNotNullSchema'
 
 const routes = Router()
 
@@ -72,7 +72,7 @@ routes.post('/recovery-password', async (req, res, next) => {
     try {
         const values = validate(checkCpfIsNotNullSchema, req.body)
 
-        await revoceryPasswordCitizen(values)
+        await recoveryPasswordCitizen(values)
 
         res.status(204).send()
     } catch (err) {
@@ -82,7 +82,7 @@ routes.post('/recovery-password', async (req, res, next) => {
 
 routes.patch('/recovery-password/:hash', async (req, res, next) => {
     try {
-        const values = validate(checkPassworIsNotNullSchema, req.body)
+        const values = validate(checkPasswordIsNotNullSchema, req.body)
         const { hash } = req.params
 
         await changePasswordCitizen(values, hash)

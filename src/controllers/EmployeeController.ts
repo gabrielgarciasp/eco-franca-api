@@ -2,14 +2,14 @@ import { Router } from 'express'
 
 import employeeAuthorization from '../middlewares/employeeAuthorization'
 import checkEmailIsNotNullEmployeeSchema from '../schemas/Employee/checkEmailIsNotNullEmployeeSchema'
-import checkPassworIsNotNullRequest from '../schemas/Employee/checkPassworIsNotNullRequest'
+import checkPasswordIsNotNullRequest from '../schemas/Employee/checkPasswordIsNotNullRequest'
 import createEmployeeSchema from '../schemas/Employee/createEmployeeSchema'
 import loginEmployeeSchema from '../schemas/Employee/loginEmployeeSchema'
 import {
     changePasswordEmployee,
     createEmployee,
     loginEmployee,
-    revoceryPasswordEmployee,
+    recoveryPasswordEmployee,
 } from '../services/EmployeeService'
 import validate from '../utils/validate'
 
@@ -39,7 +39,7 @@ routes.post('/recovery-password', async (req, res, next) => {
     try {
         const values = validate(checkEmailIsNotNullEmployeeSchema, req.body)
 
-        await revoceryPasswordEmployee(values)
+        await recoveryPasswordEmployee(values)
 
         res.status(204).send()
     } catch (err) {
@@ -49,7 +49,7 @@ routes.post('/recovery-password', async (req, res, next) => {
 
 routes.patch('/recovery-password/:hash', async (req, res, next) => {
     try {
-        const values = validate(checkPassworIsNotNullRequest, req.body)
+        const values = validate(checkPasswordIsNotNullRequest, req.body)
         const { hash } = req.params
 
         await changePasswordEmployee(values, hash)

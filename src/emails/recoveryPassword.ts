@@ -1,4 +1,4 @@
-export default (first_name: string, hash: string): string => {
+export default (first_name: string, urlChangePassword: string): string => {
     return `
         <head>
             <style>
@@ -76,7 +76,7 @@ export default (first_name: string, hash: string): string => {
 
                     <tr >
                         <td >
-                            <a href="${process.env.URL_RECOVERY_PASSWORD}/${hash}" target="_blank">Esqueci Minha Senha</a>
+                            <a href="${urlChangePassword}" target="_blank">Esqueci Minha Senha</a>
                         </td>
                     </tr>
                 </div>

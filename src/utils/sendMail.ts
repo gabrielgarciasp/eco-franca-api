@@ -12,10 +12,10 @@ const sendMail = async (email: string, title: string, html: string) => {
             },
             tls: {
                 rejectUnauthorized:
-                    process.env.EMAIL_TLS_REJECTUNAUTHORIZED == 'true',
+                    process.env.EMAIL_TLS_REJECT_UNAUTHORIZED == 'true',
             },
         }
-        const configurateEmail = createTransport(configEmail)
+        const settingsEmail = createTransport(configEmail)
 
         const informationMail = {
             from: `<${process.env.EMAIL_AUTH_USER}>`,
@@ -24,7 +24,7 @@ const sendMail = async (email: string, title: string, html: string) => {
             html: html,
         }
 
-        await configurateEmail.sendMail(informationMail)
+        await settingsEmail.sendMail(informationMail)
     } catch (err) {
         console.log('❌ Failed send email')
         console.log(err)
