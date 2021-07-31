@@ -13,6 +13,7 @@ import {
     createOccurrencePhoto,
     updateOccurrenceDeleteImages,
     getOccurrenceEmployeeByNumber,
+    getCountOccurrencesCitizen,
 } from '../services/OccurrenceService'
 import createOccurrenceSchema from '../schemas/Occurrence/createOccurrenceSchema'
 import citizenAuthorization from '../middlewares/citizenAuthorization'
@@ -28,6 +29,16 @@ routes.post('/', citizenAuthorization, async (req, res, next) => {
         const values = validate(createOccurrenceSchema, req.body)
         const response = await createOccurrence(citizenId, values)
         res.status(200).send(response)
+    } catch (err) {
+        next(err)
+    }
+})
+
+routes.get('/citizen/count', citizenAuthorization, async (req, res, next) => {
+    try {
+        const citizenId = (req as any).citizenId
+        const result = await getCountOccurrencesCitizen(citizenId)
+        res.status(200).send(result)
     } catch (err) {
         next(err)
     }
@@ -89,13 +100,14 @@ routes.get(
     }
 )
 
-
 routes.get(
     '/employee/number/:occurrenceNumber',
     employeeAuthorization,
     async (req, res, next) => {
         try {
-            const result = await getOccurrenceEmployeeByNumber(req.params.occurrenceNumber)
+            const result = await getOccurrenceEmployeeByNumber(
+                req.params.occurrenceNumber
+            )
             res.status(200).send(result)
         } catch (err) {
             next(err)
