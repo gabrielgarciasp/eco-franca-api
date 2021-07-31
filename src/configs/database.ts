@@ -7,7 +7,7 @@ createConnection({
     username: process.env.DB_USER || 'root',
     password: process.env.DB_PASS || 'root',
     database: process.env.DB_SCHEMA || 'hackathon',
-    entities: [__dirname + '/../models/*{.ts, .js}'],
+    entities: [__dirname + '/../models/*{.ts,.js}'],
     synchronize: process.env.DB_SYNCHRONIZE === 'true' || false,
     logging: process.env.DB_LOGGING === 'true' || false,
 })
