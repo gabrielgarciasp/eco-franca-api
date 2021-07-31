@@ -1,10 +1,10 @@
 type address = {
-    address: string
-    number: string
-    district: string
-    reference: string
-    latitude: string
-    longitude: string
+    address?: string
+    number?: string
+    district?: string
+    reference?: string
+    latitude?: string
+    longitude?: string
 }
 
 export type listOccurrencesCitizenResponse = {
@@ -12,8 +12,8 @@ export type listOccurrencesCitizenResponse = {
     category: string
     newNotification: boolean
     address: address
-    occurrenceNumber: string
-    violationNumber: string
+    occurrenceNumber?: string
+    violationNumber?: string
     status: string
     occurrenceDate: Date
 }

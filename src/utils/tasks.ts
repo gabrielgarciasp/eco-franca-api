@@ -3,6 +3,8 @@ import fs from 'fs'
 import { getPhotosToDelete, deletePhotos } from '../services/OccurrenceService'
 
 export default (() => {
+    if (process.env.ENABLE_TASKS != 'true') return
+
     cron.schedule('0 12 * * *', async () => {
         try {
             const occurrences = await getPhotosToDelete()

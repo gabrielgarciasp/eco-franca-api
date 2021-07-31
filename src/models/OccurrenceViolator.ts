@@ -15,16 +15,16 @@ export default class OccurrenceViolator {
     id: string
 
     @Column({ nullable: true })
-    name: string
+    name?: string
 
     @Column({ nullable: true })
-    vehicle: string
+    vehicle?: string
 
     @Column({ nullable: true })
-    address: string
+    address?: string
 
     @Column({ nullable: true })
-    otherInformation: string
+    otherInformation?: string
 
     @OneToOne(() => Occurrence)
     @JoinColumn()

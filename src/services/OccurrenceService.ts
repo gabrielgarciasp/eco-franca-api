@@ -25,6 +25,7 @@ import { uploadedFile } from '../types/uploadedFile'
 import BadRequestError from '../exceptions/BadRequestError'
 import uuid from '../utils/uuid'
 import OccurrencePhoto from '../models/OccurrencePhoto'
+import { getCountOccurrencesCitizenResponse } from '../types/occurrence/getCountOccurrencesCitizenResponse'
 
 const getOccurrenceById = async (occurrenceId: string): Promise<Occurrence> => {
     const repository = getRepository(Occurrence)
@@ -63,7 +64,7 @@ const createOccurrence = async (
     occurrence.reference = entity.reference
     occurrence.latitude = entity.latitude
     occurrence.longitude = entity.longitude
-    occurrence.occurrenceDate = entity.occurrenceDate
+    occurrence.occurrenceDate = entity.occurrenceDate || new Date()
     occurrence.citizen = await getCitizenFromId(citizenId)
 
     await repository.save(occurrence)
@@ -96,6 +97,24 @@ const createOccurrence = async (
 
     return {
         id: occurrence.id,
+    }
+}
+
+const getCountOccurrencesCitizen = async (
+    citizenId: string
+): Promise<getCountOccurrencesCitizenResponse> => {
+    const repository = getRepository(Occurrence)
+
+    const occurrences = await repository.count({
+        where: {
+            citizen: {
+                id: citizenId,
+            },
+        },
+    })
+
+    return {
+        count: occurrences,
     }
 }
 
@@ -495,6 +514,7 @@ const deletePhotos = async (occurrenceId: string) => {
 export {
     getOccurrenceById,
     createOccurrence,
+    getCountOccurrencesCitizen,
     getOccurrencesCitizen,
     getOccurrenceCitizen,
     getOccurrencesEmployee,

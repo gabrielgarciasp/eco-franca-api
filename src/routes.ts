@@ -18,10 +18,12 @@ routes.use((err: ApiError, req: Request, res: Response, next: NextFunction) => {
             .send({ ...err, statusCode: undefined })
     }
 
-    console.log(err);
-
-    res.status(500).send(err)
-    // res.status(500).send({ message: 'Internal error' })
+    if (process.env.DEBUG_MODE === 'true') {
+        console.log(err)
+        res.status(500).send(err)
+    } else {
+        res.status(500).send({ message: 'Internal error' })
+    }
 })
 
 export default routes
