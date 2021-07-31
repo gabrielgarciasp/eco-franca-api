@@ -16,7 +16,10 @@ import { getOccurrenceCitizenResponse } from '../types/occurrence/getOccurrenceC
 import { pagination } from '../types/pagination'
 import { getCitizenFromId } from './CitizenService'
 import { getEmployeeById } from './EmployeeService'
-import { getOccurrenceEmployeeByIdResponse, getOccurrenceEmployeeResponse } from '../types/occurrence/getOccurrenceEmployeeResponse'
+import {
+    getOccurrenceEmployeeByIdResponse,
+    getOccurrenceEmployeeResponse,
+} from '../types/occurrence/getOccurrenceEmployeeResponse'
 import { createOccurrenceResponse } from '../types/occurrence/createOccurrenceResponse'
 import { uploadedFile } from '../types/uploadedFile'
 import BadRequestError from '../exceptions/BadRequestError'
@@ -311,13 +314,12 @@ const getOccurrenceEmployee = async (
 const getOccurrenceEmployeeByNumber = async (
     number: string
 ): Promise<getOccurrenceEmployeeByIdResponse> => {
-
     const repository = getRepository(Occurrence)
 
     const occurrence = await repository.findOne({
         where: {
             occurrenceNumber: number,
-        }
+        },
     })
 
     if (occurrence === undefined) {
@@ -328,8 +330,6 @@ const getOccurrenceEmployeeByNumber = async (
         id: occurrence.id,
     }
 }
-
-
 
 const updateOccurrence = async (
     occurrenceId: string,
@@ -417,7 +417,9 @@ const createOccurrencePhoto = async (
 
     const repository = getRepository(Occurrence)
 
-    const images = files.files as uploadedFile[]
+    const images = (
+        Array.isArray(files.files) ? files.files : [files.files]
+    ) as uploadedFile[]
 
     await Promise.all(
         images.map((image) => {
