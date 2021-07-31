@@ -4,8 +4,10 @@ import {
     Generated,
     CreateDateColumn,
     UpdateDateColumn,
+    Entity,
 } from 'typeorm'
 
+@Entity({ synchronize: false })
 export default class User {
     @PrimaryColumn()
     @Generated('uuid')

@@ -1,6 +1,5 @@
 import { getRepository } from 'typeorm'
 
-import BadRequestError from '../exceptions/BadRequestError'
 import ConflictError from '../exceptions/ConflictError'
 import ForbiddenError from '../exceptions/ForbiddenError'
 import NotFoundError from '../exceptions/NotFoundError'
@@ -133,7 +132,7 @@ const loginEmployee = async (
     }
 }
 
-const revoceryPasswordEmployee = async (
+const recoveryPasswordEmployee = async (
     entity: checkEmailIsNotNullEmployeeRequest
 ) => {
     const repository = getRepository(Employee)
@@ -143,9 +142,11 @@ const revoceryPasswordEmployee = async (
 
     await repository.save(employee)
 
+    const urlChangePassword = `${process.env.URL_RECOVERY_PASSWORD}/${employee.hash_update_password}`
+
     const bodyEmail = templateRecoveryPassword(
         employee.first_name,
-        employee.hash_update_password
+        urlChangePassword
     )
 
     if (process.env.SEND_EMAIL == 'true') {
@@ -172,6 +173,6 @@ export {
     getEmployeeByEmail,
     createEmployee,
     loginEmployee,
-    revoceryPasswordEmployee,
+    recoveryPasswordEmployee,
     changePasswordEmployee,
 }
