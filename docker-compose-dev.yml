@@ -19,6 +19,6 @@ services:
             - 3000:3000
         volumes:
             - ./:/usr/app
-        command: bash -c "cd /usr/app && npm i && npm run build && npm run start"
+        command: bash -c "cd /usr/app && npm i && npm run dev"
         links:
             - db:db
