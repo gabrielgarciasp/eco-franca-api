@@ -9,7 +9,7 @@ const schema = Yup.object().shape({
     reference: Yup.string(),
     latitude: Yup.string(),
     longitude: Yup.string(),
-    occurrenceDate: Yup.date().required(),
+    occurrenceDate: Yup.date(),
     violatorName: Yup.string(),
     violatorVehicle: Yup.string(),
     violatorAddress: Yup.string(),

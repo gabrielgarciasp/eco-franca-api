@@ -31,22 +31,22 @@ export default class Occurrence {
     description: string
 
     @Column({ nullable: true })
-    address: string
+    address?: string
 
     @Column({ nullable: true })
-    number: string
+    number?: string
 
     @Column({ nullable: true })
-    district: string
+    district?: string
 
     @Column({ nullable: true })
-    reference: string
+    reference?: string
 
     @Column({ nullable: true })
-    latitude: string
+    latitude?: string
 
     @Column({ nullable: true })
-    longitude: string
+    longitude?: string
 
     @Column()
     occurrenceDate: Date
@@ -55,10 +55,10 @@ export default class Occurrence {
     newNotification: boolean
 
     @Column({ nullable: true })
-    occurrenceNumber: string
+    occurrenceNumber?: string
 
     @Column({ nullable: true })
-    violationNumber: string
+    violationNumber?: string
 
     @Column({ default: false })
     deleteImages: boolean

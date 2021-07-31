@@ -64,7 +64,7 @@ const createOccurrence = async (
     occurrence.reference = entity.reference
     occurrence.latitude = entity.latitude
     occurrence.longitude = entity.longitude
-    occurrence.occurrenceDate = entity.occurrenceDate
+    occurrence.occurrenceDate = entity.occurrenceDate || new Date()
     occurrence.citizen = await getCitizenFromId(citizenId)
 
     await repository.save(occurrence)

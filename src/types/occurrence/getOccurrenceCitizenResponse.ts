@@ -12,12 +12,12 @@ type violator = {
 }
 
 type address = {
-    address: string
-    number: string
-    district: string
-    reference: string
-    latitude: string
-    longitude: string
+    address?: string
+    number?: string
+    district?: string
+    reference?: string
+    latitude?: string
+    longitude?: string
 }
 
 export type getOccurrenceCitizenResponse = {
@@ -26,8 +26,8 @@ export type getOccurrenceCitizenResponse = {
     description: string
     occurrenceDate: Date
     newNotification: boolean
-    occurrenceNumber: string
-    violationNumber: string
+    occurrenceNumber?: string
+    violationNumber?: string
     address: address
     histories: history[]
     violator: violator

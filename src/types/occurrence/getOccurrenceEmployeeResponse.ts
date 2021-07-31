@@ -23,12 +23,12 @@ type violator = {
 }
 
 type address = {
-    address: string
-    number: string
-    district: string
-    reference: string
-    latitude: string
-    longitude: string
+    address?: string
+    number?: string
+    district?: string
+    reference?: string
+    latitude?: string
+    longitude?: string
 }
 
 type internalComment = {
@@ -43,8 +43,8 @@ export type getOccurrenceEmployeeResponse = {
     description: string
     occurrenceDate: Date
     newNotification: boolean
-    occurrenceNumber: string
-    violationNumber: string
+    occurrenceNumber?: string
+    violationNumber?: string
     address: address
     citizen: citizen
     histories: history[]

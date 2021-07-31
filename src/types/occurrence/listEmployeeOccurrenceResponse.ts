@@ -1,18 +1,18 @@
 type address = {
-    address: string
-    number: string
-    district: string
-    reference: string
-    latitude: string
-    longitude: string
+    address?: string
+    number?: string
+    district?: string
+    reference?: string
+    latitude?: string
+    longitude?: string
 }
 
 type responseOccurrence = {
     id: string
     category: string
     address: address
-    occurrenceNumber: string
-    violationNumber: string
+    occurrenceNumber?: string
+    violationNumber?: string
     status: string
     occurrenceDate: Date
 }
