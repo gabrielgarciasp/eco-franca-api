@@ -115,12 +115,12 @@ const createCitizen = async (entity: createCitizenRequest) => {
 
     await repository.save(citizen)
 
-    const bodyEmail = templateVerifyEmail(
-        citizen.first_name,
-        citizen.hash_verified_email
-    )
-
     if (process.env.SEND_EMAIL == 'true') {
+        const bodyEmail = templateVerifyEmail(
+            citizen.first_name,
+            citizen.hash_verified_email
+        )
+
         sendMail(entity.email, 'Verificar E-mail', bodyEmail)
     }
 }
@@ -221,14 +221,14 @@ const recoveryPasswordCitizen = async (entity: checkCpfIsNotNullRequest) => {
 
     await repository.save(citizen)
 
-    const urlChangePassword = `${process.env.URL_RECOVERY_PASSWORD}/${citizen.hash_update_password}`
+    if (process.env.SEND_EMAIL === 'true') {
+        const urlChangePassword = `${process.env.URL_RECOVERY_PASSWORD_CITIZEN}/${citizen.hash_update_password}`
 
-    const bodyEmail = templateRecoveryPassword(
-        citizen.first_name,
-        urlChangePassword
-    )
+        const bodyEmail = templateRecoveryPassword(
+            citizen.first_name,
+            urlChangePassword
+        )
 
-    if (process.env.SEND_EMAIL == 'true') {
         sendMail(citizen.email, 'Recuperar Senha EcoFranca', bodyEmail)
     }
 }
