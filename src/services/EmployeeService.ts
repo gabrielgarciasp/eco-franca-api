@@ -142,14 +142,14 @@ const recoveryPasswordEmployee = async (
 
     await repository.save(employee)
 
-    const urlChangePassword = `${process.env.URL_RECOVERY_PASSWORD}/${employee.hash_update_password}`
-
-    const bodyEmail = templateRecoveryPassword(
-        employee.first_name,
-        urlChangePassword
-    )
-
     if (process.env.SEND_EMAIL == 'true') {
+        const urlChangePassword = `${process.env.URL_RECOVERY_PASSWORD_EMPLOYEE}/${employee.hash_update_password}`
+
+        const bodyEmail = templateRecoveryPassword(
+            employee.first_name,
+            urlChangePassword
+        )
+
         sendMail(employee.email, 'Recuperar Senha EcoFranca', bodyEmail)
     }
 }
