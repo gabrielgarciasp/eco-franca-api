@@ -188,9 +188,9 @@ const getOccurrenceCitizen = async (
             }))
             .sort((a, b) =>
                 a.historyDate.getTime() > b.historyDate.getTime()
-                    ? -1
-                    : b.historyDate.getTime() > a.historyDate.getTime()
                     ? 1
+                    : b.historyDate.getTime() > a.historyDate.getTime()
+                    ? -1
                     : 0
             ),
         violator: {
@@ -297,9 +297,9 @@ const getOccurrenceEmployee = async (
             }))
             .sort((a, b) =>
                 a.historyDate.getTime() > b.historyDate.getTime()
-                    ? -1
-                    : b.historyDate.getTime() > a.historyDate.getTime()
                     ? 1
+                    : b.historyDate.getTime() > a.historyDate.getTime()
+                    ? -1
                     : 0
             ),
         photos: occurrence.photos.map(
