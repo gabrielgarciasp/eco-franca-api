@@ -107,6 +107,7 @@ const getCountOccurrencesCitizen = async (
 
     const occurrences = await repository.count({
         where: {
+            newNotification: true,
             citizen: {
                 id: citizenId,
             },
