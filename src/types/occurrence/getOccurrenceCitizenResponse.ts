@@ -31,4 +31,5 @@ export type getOccurrenceCitizenResponse = {
     address: address
     histories: history[]
     violator: violator
+    photos: string[]
 }

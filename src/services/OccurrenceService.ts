@@ -200,6 +200,9 @@ const getOccurrenceCitizen = async (
             address: occurrence?.violator?.address,
             otherInformation: occurrence?.violator?.otherInformation,
         },
+        photos: occurrence.photos.map(
+            (photo) => process.env.URL_PHOTOS + '/' + photo.filaname
+        ),
     }
 }
 
