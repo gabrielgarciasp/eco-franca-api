@@ -4,7 +4,7 @@ import ValidationErrorException from '../exceptions/ValidationError'
 export default <Type>(schema: SchemaOf<Type>, object: Type): Type => {
     try {
         return schema.validateSync(object, { abortEarly: false }) as Type
-    } catch (err) {
+    } catch (err: any) {
         const fields: Object[] = []
 
         err.inner.forEach(({ path, message }: ValidationError) => {
